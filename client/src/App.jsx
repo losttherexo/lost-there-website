@@ -7,8 +7,13 @@ import Lab from './pages/Lab'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
+import ComingSoon from './pages/ComingSoon'
+import { SHOW_SPLASH } from './comingSoon'
 
 export default function App() {
+  // Pre-launch gate: show the splash to the public, full site behind ?preview=1.
+  if (SHOW_SPLASH) return <ComingSoon />
+
   return (
     <Routes>
       <Route element={<Layout />}>

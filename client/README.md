@@ -74,7 +74,13 @@ Live target: **lostthere.online** (replacing the old `lostthere.netlify.app`).
 
 Then in Vercel *Project → Settings → Domains* add both `lostthere.online` and `www.lostthere.online` (set one as primary; Vercel issues the TLS cert automatically once DNS resolves). Verify propagation with `dig lostthere.online +short` (expect `76.76.21.21`) and `dig www.lostthere.online +short` (expect the Vercel CNAME), or https://dnschecker.org. Propagation is usually minutes, up to ~a few hours.
 
-**Search indexing:** `index.html` carries `<meta name="robots" content="noindex,nofollow">` so the placeholder wireframe doesn't get indexed. **Remove that line when real content ships.** (Chose this over a "coming soon" gate — one line to delete vs. a toggle component to maintain, and nobody's finding the domain organically yet.)
+**Pre-launch splash.** A "coming soon" gate (`src/pages/ComingSoon.jsx`) renders for the public until launch; the gate lives in `src/comingSoon.js` and is wired in `App.jsx`.
+- **Default:** on in production, off during local `npm run dev`.
+- **Toggle without a code change:** Vercel env var `VITE_COMING_SOON` = `"true"` | `"false"`.
+- **Preview the real site behind it:** add `?preview=1` to the URL (persists per-browser via localStorage; `?preview=0` re-locks).
+- **To launch for good:** set `VITE_COMING_SOON="false"` **and** remove the `noindex` meta below.
+
+**Search indexing:** `index.html` carries `<meta name="robots" content="noindex,nofollow">` so the placeholder site doesn't get indexed while the splash is up. **Remove it at launch, together with the splash toggle.**
 
 ## What was migrated
 
