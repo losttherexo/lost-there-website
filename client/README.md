@@ -18,6 +18,33 @@ npm run build    # production bundle in dist/
 npm run preview  # serve the built bundle
 ```
 
+## Deploy (Vercel)
+
+Live target: **lostthere.online** (replacing the old `lostthere.netlify.app`).
+
+**Repo settings on Vercel (do once):**
+- **Root Directory:** `client` (the repo root holds both `client/` and `server/`; the site is the client).
+- **Framework Preset:** Vite (auto-detected).
+- **Build Command:** `npm run build` · **Output Directory:** `dist` · **Install:** `npm install`.
+- Pushes to the connected branch auto-deploy. PRs/other branches get preview URLs.
+
+**`vercel.json`** (in `client/`) adds the SPA fallback — without it, hard-loading a deep route like `/music` 404s because there's no `index.html` at that path:
+```json
+{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+```
+(Static assets in `dist/` are matched by the filesystem first, so the rewrite only catches client-side routes.)
+
+**DNS — Namecheap → Vercel.** In Namecheap: *Domain List → Manage → Advanced DNS*. Remove any default parking/`URL Redirect` records, then add:
+
+| Type    | Host  | Value                   | TTL       |
+|---------|-------|-------------------------|-----------|
+| `A`     | `@`   | `76.76.21.21`           | Automatic |
+| `CNAME` | `www` | `cname.vercel-dns.com.` | Automatic |
+
+Then in Vercel *Project → Settings → Domains* add both `lostthere.online` and `www.lostthere.online` (set one as primary; Vercel issues the TLS cert automatically once DNS resolves). Verify propagation with `dig lostthere.online +short` (expect `76.76.21.21`) and `dig www.lostthere.online +short` (expect the Vercel CNAME), or https://dnschecker.org. Propagation is usually minutes, up to ~a few hours.
+
+**Search indexing:** `index.html` carries `<meta name="robots" content="noindex,nofollow">` so the placeholder wireframe doesn't get indexed. **Remove that line when real content ships.** (Chose this over a "coming soon" gate — one line to delete vs. a toggle component to maintain, and nobody's finding the domain organically yet.)
+
 ## What was migrated
 
 - **CRA → Vite.** `react-scripts` removed; `vite` + `@vitejs/plugin-react` added. `vite.config.js` registers the React and Tailwind plugins.
