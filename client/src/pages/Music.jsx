@@ -1,55 +1,52 @@
 import useDocumentTitle from '../hooks/useDocumentTitle'
-import Placeholder from '../components/Placeholder'
+import ReleaseCard from '../components/ReleaseCard'
+import Embed from '../components/Embed'
+import { releases } from '../data/releases'
 
-const RELEASES = [1, 2, 3, 4, 5, 6]
-const TRACKS = [1, 2, 3, 4, 5, 6, 7]
+// Standalone "find me on" players — placeholder URLs render labeled boxes.
+const PLATFORMS = [
+  { provider: 'spotify', url: '' },
+  { provider: 'soundcloud', url: '' },
+  { provider: 'untitled', url: '' },
+]
 
 export default function Music() {
   useDocumentTitle('Music')
+
   return (
     <>
-      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Music</h1>
-        <p className="mt-2 text-neutral-400">Releases, embeds, and tracks.</p>
+      <section className="shell py-12 md:py-16">
+        <h1 className="text-4xl font-bold md:text-5xl">Music</h1>
+        <p className="mt-3 max-w-xl text-muted">
+          [Releases, singles, and works in progress. Expand any release for the player and full
+          track listing.]
+        </p>
       </section>
 
-      <section aria-labelledby="releases-heading" className="max-w-6xl mx-auto px-4 py-12 border-t border-neutral-800">
-        <h2 id="releases-heading" className="text-2xl md:text-3xl font-semibold mb-6">Releases</h2>
-        <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {RELEASES.map((n) => (
-            <li key={n}>
-              <article className="border border-neutral-800 p-3">
-                <Placeholder label="[COVER]" minHeight="180px" />
-                <p className="mt-3 text-sm font-medium">[RELEASE TITLE]</p>
-                <p className="text-xs text-neutral-500">[YEAR]</p>
-              </article>
+      {/* Releases grid */}
+      <section aria-labelledby="releases-heading" className="shell border-t border-line py-12">
+        <h2 id="releases-heading" className="mb-6 text-2xl font-semibold md:text-3xl">
+          Releases
+        </h2>
+        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {releases.map((r) => (
+            <li key={r.id}>
+              <ReleaseCard release={r} />
             </li>
           ))}
         </ul>
       </section>
 
-      <section aria-labelledby="streaming-heading" className="max-w-6xl mx-auto px-4 py-12 border-t border-neutral-800">
-        <h2 id="streaming-heading" className="text-2xl md:text-3xl font-semibold mb-6">Streaming Embeds</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Placeholder label="[SPOTIFY EMBED]" minHeight="180px" />
-          <Placeholder label="[SOUNDCLOUD EMBED]" minHeight="180px" />
-          <Placeholder label="[UNTITLED.STREAM EMBED]" minHeight="180px" />
-        </div>
-      </section>
-
-      <section aria-labelledby="tracks-heading" className="max-w-6xl mx-auto px-4 py-12 border-t border-neutral-800">
-        <h2 id="tracks-heading" className="text-2xl md:text-3xl font-semibold mb-6">Track Listing</h2>
-        <ol className="border-y border-neutral-800 divide-y divide-neutral-800">
-          {TRACKS.map((n) => (
-            <li key={n} className="flex items-center justify-between py-3 px-4">
-              <span className="flex items-center gap-4">
-                <span className="text-neutral-500 tabular-nums w-6">{String(n).padStart(2, '0')}</span>
-                <span>[TRACK TITLE]</span>
-              </span>
-              <span className="text-neutral-500 text-sm tabular-nums">[--:--]</span>
-            </li>
+      {/* Listen everywhere */}
+      <section aria-labelledby="listen-heading" className="shell border-t border-line py-12">
+        <h2 id="listen-heading" className="mb-6 text-2xl font-semibold md:text-3xl">
+          Listen everywhere
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {PLATFORMS.map((p) => (
+            <Embed key={p.provider} provider={p.provider} url={p.url} />
           ))}
-        </ol>
+        </div>
       </section>
     </>
   )

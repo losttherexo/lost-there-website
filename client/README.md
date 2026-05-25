@@ -124,20 +124,32 @@ client/
    ├─ main.jsx             ← ReactDOM.createRoot + BrowserRouter
    ├─ App.jsx              ← <Routes> w/ Layout wrapper
    ├─ index.css            ← Tailwind import + @theme + base styles
+   ├─ comingSoon.js        ← pre-launch gate logic (toggle + ?preview bypass)
    ├─ components/
    │  ├─ Layout.jsx        ← persistent <nav>, <main>, <footer>, skip-link, mobile drawer
-   │  └─ Placeholder.jsx   ← labeled wireframe box
+   │  ├─ Placeholder.jsx   ← labeled wireframe box
+   │  ├─ Embed.jsx         ← provider-aware embed wrapper (Spotify/SoundCloud/untitled/yt…)
+   │  └─ ReleaseCard.jsx   ← release grid card; expands to player + track listing
+   ├─ data/
+   │  └─ releases.js       ← editable placeholder release data (drives Music + Home featured)
    ├─ hooks/
    │  └─ useDocumentTitle.js
    └─ pages/
-      ├─ Home.jsx
-      ├─ Music.jsx
-      ├─ Shows.jsx
-      ├─ Lab.jsx
-      ├─ About.jsx          ← dual-purpose: fan bio + press kit
-      ├─ Contact.jsx
+      ├─ Home.jsx           ← BUILT: hero, featured release, explore teasers
+      ├─ Music.jsx          ← BUILT: releases grid (ReleaseCard) + "listen everywhere"
+      ├─ Shows.jsx          ← wireframe
+      ├─ Lab.jsx            ← wireframe
+      ├─ About.jsx          ← wireframe (dual-purpose: fan bio + press kit)
+      ├─ Contact.jsx        ← wireframe
+      ├─ ComingSoon.jsx     ← pre-launch splash
       └─ NotFound.jsx
 ```
+
+## Components
+
+- **`<Embed provider url title height />`** — the one embed primitive for the whole site. Builds the iframe src per provider (`spotify` / `soundcloud` / `untitled` / `apple` / `bandcamp` / `youtube`) from a normal share URL; empty `url` → a labeled placeholder box. Reuse for every embed slot (release players, TD reel, previz).
+- **`<ReleaseCard release />`** — square cover (or placeholder tile) + title/year; expands (accessible `aria-expanded`/`aria-controls` toggle) to reveal an `<Embed>` and the track listing. Fed by `data/releases.js`.
+- **`data/releases.js`** — array of releases (`title`, `year`, `type`, `cover`, `blurb`, `embed:{provider,url}`, `tracks[]`) + a `featuredRelease` export Home uses. All placeholder; edit in place, drop real share URLs into `embed.url`.
 
 ## Accessibility baseline
 

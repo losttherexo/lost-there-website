@@ -1,47 +1,94 @@
 import { Link } from 'react-router-dom'
+import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi'
 import useDocumentTitle from '../hooks/useDocumentTitle'
-import Placeholder from '../components/Placeholder'
+import Embed from '../components/Embed'
+import { featuredRelease } from '../data/releases'
 
 const TEASERS = [
-  { to: '/music', label: 'Music' },
-  { to: '/shows', label: 'Shows' },
-  { to: '/lab', label: 'Lab' },
-  { to: '/about', label: 'About' },
+  { to: '/music', label: 'Music', copy: '[Releases, embeds, and the back catalog.]' },
+  { to: '/shows', label: 'Shows', copy: '[Upcoming dates and where to catch me live.]' },
+  { to: '/lab', label: 'Lab', copy: '[Visual + creative-tech experiments.]' },
+  { to: '/about', label: 'About', copy: '[Bio, press kit, and the story so far.]' },
 ]
 
-const ctaCls =
-  'inline-block px-6 py-3 border border-neutral-100 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-950 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950'
+const btn = 'inline-flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors'
+const btnPrimary = `${btn} bg-accent text-accent-contrast hover:opacity-90`
+const btnGhost = `${btn} border border-line text-ink hover:bg-surface`
 
 export default function Home() {
   useDocumentTitle()
+
   return (
     <>
-      <section aria-labelledby="hero-heading" className="max-w-6xl mx-auto px-4 py-16 md:py-28">
-        <h1 id="hero-heading" className="text-5xl md:text-7xl font-bold tracking-tight">lost,there</h1>
-        <p className="mt-4 text-xl text-neutral-400">[TAGLINE PLACEHOLDER]</p>
-        <div className="mt-8">
-          <Link to="/music" className={ctaCls}>Listen now</Link>
+      {/* Hero */}
+      <section aria-labelledby="hero-heading" className="shell py-20 md:py-32">
+        <p className="text-sm uppercase tracking-[0.3em] text-muted">[ARTIST NAME]</p>
+        <h1 id="hero-heading" className="mt-4 text-5xl md:text-7xl font-bold">
+          lost,there
+        </h1>
+        <p className="mt-6 max-w-xl text-lg md:text-xl text-muted">
+          [TAGLINE — one line on who you are and what this sounds like.]
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link to="/music" className={btnPrimary}>
+            Listen <FiArrowRight aria-hidden="true" />
+          </Link>
+          <Link to="/shows" className={btnGhost}>
+            Live shows
+          </Link>
         </div>
       </section>
 
-      <section aria-labelledby="featured-heading" className="max-w-6xl mx-auto px-4 py-12 border-t border-neutral-800">
-        <h2 id="featured-heading" className="text-2xl md:text-3xl font-semibold mb-6">Latest Release</h2>
-        <Placeholder label="[RELEASE EMBED]" minHeight="280px">
-          Spotify / Apple Music / Bandcamp embed for the most recent release.
-        </Placeholder>
+      {/* Featured release */}
+      <section aria-labelledby="featured-heading" className="shell border-t border-line py-12">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <h2 id="featured-heading" className="text-2xl font-semibold md:text-3xl">
+            Latest release
+          </h2>
+          <Link
+            to="/music"
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink transition-colors"
+          >
+            All music <FiArrowUpRight aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="grid items-start gap-6 md:grid-cols-[1fr_1.4fr]">
+          <div>
+            <p className="text-lg font-medium">{featuredRelease.title}</p>
+            <p className="text-sm text-muted">
+              {featuredRelease.year}
+              {featuredRelease.type ? ` · ${featuredRelease.type}` : ''}
+            </p>
+            <p className="mt-3 max-w-sm text-sm text-faint">{featuredRelease.blurb}</p>
+          </div>
+          <Embed
+            provider={featuredRelease.embed.provider}
+            url={featuredRelease.embed.url}
+            title={`${featuredRelease.title} — featured player`}
+          />
+        </div>
       </section>
 
-      <section aria-labelledby="explore-heading" className="max-w-6xl mx-auto px-4 py-12 border-t border-neutral-800">
-        <h2 id="explore-heading" className="text-2xl md:text-3xl font-semibold mb-6">Explore</h2>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {TEASERS.map((item) => (
-            <li key={item.to}>
+      {/* Explore teasers */}
+      <section aria-labelledby="explore-heading" className="shell border-t border-line py-12">
+        <h2 id="explore-heading" className="mb-6 text-2xl font-semibold md:text-3xl">
+          Explore
+        </h2>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {TEASERS.map((t) => (
+            <li key={t.to}>
               <Link
-                to={item.to}
-                className="block border border-neutral-800 p-6 hover:bg-neutral-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                to={t.to}
+                className="group flex h-full flex-col justify-between border border-line p-5 transition-colors hover:bg-surface"
               >
-                <p className="text-lg font-medium">{item.label}</p>
-                <p className="mt-2 text-sm text-neutral-500">[TEASER COPY]</p>
+                <span className="flex items-center justify-between">
+                  <span className="text-lg font-medium">{t.label}</span>
+                  <FiArrowUpRight
+                    aria-hidden="true"
+                    className="text-muted transition-colors group-hover:text-ink"
+                  />
+                </span>
+                <span className="mt-10 text-sm text-faint">{t.copy}</span>
               </Link>
             </li>
           ))}
