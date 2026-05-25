@@ -65,14 +65,14 @@ Live target: **lostthere.online** (replacing the old `lostthere.netlify.app`).
 ```
 (Static assets in `dist/` are matched by the filesystem first, so the rewrite only catches client-side routes.)
 
-**DNS — Namecheap → Vercel.** In Namecheap: *Domain List → Manage → Advanced DNS*. Remove any default parking/`URL Redirect` records, then add:
+**DNS — Namecheap → Vercel.** Both `lostthere.online` and `www.lostthere.online` are attached to the Vercel project. In Namecheap: *Domain List → Manage → Advanced DNS*. Remove the default parking records (`CNAME www → parkingpage`, any `URL Redirect`/`A @ → parking`), then add what Vercel's CLI asked for:
 
-| Type    | Host  | Value                   | TTL       |
-|---------|-------|-------------------------|-----------|
-| `A`     | `@`   | `76.76.21.21`           | Automatic |
-| `CNAME` | `www` | `cname.vercel-dns.com.` | Automatic |
+| Type | Host  | Value         | TTL       |
+|------|-------|---------------|-----------|
+| `A`  | `@`   | `76.76.21.21` | Automatic |
+| `A`  | `www` | `76.76.21.21` | Automatic |
 
-Then in Vercel *Project → Settings → Domains* add both `lostthere.online` and `www.lostthere.online` (set one as primary; Vercel issues the TLS cert automatically once DNS resolves). Verify propagation with `dig lostthere.online +short` (expect `76.76.21.21`) and `dig www.lostthere.online +short` (expect the Vercel CNAME), or https://dnschecker.org. Propagation is usually minutes, up to ~a few hours.
+(`www` can alternatively be a `CNAME` → `cname.vercel-dns.com.` — pick one, not both.) Vercel auto-verifies and issues the TLS cert once DNS resolves. Check with `dig lostthere.online +short` and `dig www.lostthere.online +short` (both expect `76.76.21.21`), or https://dnschecker.org. Propagation is usually minutes, up to a few hours.
 
 **Pre-launch splash.** A "coming soon" gate (`src/pages/ComingSoon.jsx`) renders for the public until launch; the gate lives in `src/comingSoon.js` and is wired in `App.jsx`.
 - **Default:** on in production, off during local `npm run dev`.
