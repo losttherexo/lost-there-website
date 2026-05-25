@@ -7,6 +7,37 @@ Rework of the lost,there artist site. Migrated from Create React App to Vite, re
 - **Vite 5** + **React 18** (JSX)
 - **React Router v6**
 - **Tailwind CSS v4** (via `@tailwindcss/vite`, CSS-first config — no `tailwind.config.js`)
+- **Inter** (Google Fonts, placeholder typeface)
+
+## Design system (foundation)
+
+A restrained, themeable base — **not** the final visual identity. All tokens live in the `@theme {}` block of `src/index.css`; changing a token re-themes every utility built from it.
+
+**Two swap points re-skin most of the site:**
+- **Typeface** — `--font-sans` in `src/index.css` + the `<link>` in `index.html`. Currently Inter; swap when identity is locked.
+- **Accent** — `--color-accent` (+ `--color-accent-contrast`). Currently a muted slate-blue; one line to change everywhere it's used (focus rings, active nav, CTAs).
+
+**Color tokens** (off-black canvas → off-white ink, faintly cool, deliberately not pure #000/#fff). Each generates `bg-/text-/border-/ring-` utilities:
+
+| Token | Hex | Use | Utility example |
+|-------|-----|-----|-----------------|
+| `--color-canvas` | `#0b0b0c` | page background | `bg-canvas` |
+| `--color-surface` | `#141416` | raised panel / card | `bg-surface` |
+| `--color-elevated` | `#1d1d20` | hover / nested surface | `bg-elevated` |
+| `--color-line` | `#2a2a2e` | hairline borders, dividers | `border-line` |
+| `--color-ink` | `#f4f4f5` | primary text | `text-ink` |
+| `--color-muted` | `#a1a1aa` | secondary text | `text-muted` |
+| `--color-faint` | `#71717a` | tertiary / placeholder | `text-faint` |
+| `--color-accent` | `#6b8fb5` | focus, active nav, CTA | `bg-accent` / `border-accent` / `ring-accent` |
+| `--color-accent-contrast` | `#0b0b0c` | text on the accent | `text-accent-contrast` |
+
+**Type** — custom scale (`text-xs`…`text-7xl`) with generous body line-heights and tight heading leading; weight carries hierarchy. `h1–h3` get `tracking-tight` + `text-balance` from the base layer.
+
+**Spacing rhythm** — Tailwind's default 0.25rem step. Page convention: horizontal gutter via the **`shell`** utility (`max-w-6xl mx-auto px-4 sm:px-6`); section vertical padding `py-12` (compact) / `py-16` (default) / `py-24+` (hero).
+
+**Global focus** — one `:focus-visible` rule in the base layer puts an accent ring on every interactive element (no per-component ring classes needed).
+
+**Nav** (`components/Layout.jsx`) — desktop bar + mobile hamburger drawer; active route shows an accent underline (desktop) / accent left-rail (mobile) via `NavLink`; drawer closes on route change **and on Escape**; skip-to-content link wired to `#main`.
 
 ## Run
 

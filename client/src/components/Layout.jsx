@@ -10,47 +10,55 @@ const NAV_ITEMS = [
   { to: '/contact', label: 'contact' },
 ]
 
-const linkBase =
-  'px-3 py-2 text-sm uppercase tracking-wider transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 rounded'
-const linkInactive = 'text-neutral-400 hover:text-neutral-100'
-const linkActive = 'text-neutral-100 font-semibold'
+// Active state = accent underline (desktop) / accent left-rail (mobile).
+// Focus rings come from the global :focus-visible rule in index.css.
+const deskBase = 'px-3 py-2 text-sm uppercase tracking-wider border-b-2 transition-colors'
+const deskCls = ({ isActive }) =>
+  `${deskBase} ${isActive ? 'text-ink border-accent font-medium' : 'text-muted border-transparent hover:text-ink'}`
+
+const mobileBase = 'block px-4 py-3 text-sm uppercase tracking-wider border-l-2 transition-colors'
+const mobileCls = ({ isActive }) =>
+  `${mobileBase} ${isActive ? 'text-ink border-accent font-medium bg-surface' : 'text-muted border-transparent hover:text-ink hover:bg-surface'}`
 
 export default function Layout() {
   const [navOpen, setNavOpen] = useState(false)
   const location = useLocation()
 
+  // Close the mobile menu on route change.
   useEffect(() => {
     setNavOpen(false)
   }, [location.pathname])
+
+  // Close the mobile menu on Escape (keyboard a11y).
+  useEffect(() => {
+    if (!navOpen) return
+    const onKey = (e) => e.key === 'Escape' && setNavOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navOpen])
 
   return (
     <div className="min-h-screen flex flex-col">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-neutral-100 focus:text-neutral-950 focus:px-3 focus:py-2 focus:rounded"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-ink focus:text-canvas focus:px-3 focus:py-2 focus:rounded"
       >
         Skip to content
       </a>
 
-      <header className="border-b border-neutral-800">
+      <header className="border-b border-line">
         <nav
           aria-label="Primary"
-          className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between"
+          className="shell h-16 flex items-center justify-between"
         >
-          <NavLink to="/" end className="text-xl font-semibold tracking-tight">
+          <NavLink to="/" end className="text-xl font-semibold tracking-tight text-ink">
             lost,there
           </NavLink>
 
           <ul className="hidden md:flex items-center gap-1">
             {NAV_ITEMS.filter((item) => item.to !== '/').map((item) => (
               <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `${linkBase} ${isActive ? linkActive : linkInactive}`
-                  }
-                >
+                <NavLink to={item.to} end={item.end} className={deskCls}>
                   {item.label}
                 </NavLink>
               </li>
@@ -63,7 +71,7 @@ export default function Layout() {
             aria-expanded={navOpen}
             aria-controls="mobile-nav"
             onClick={() => setNavOpen((o) => !o)}
-            className="md:hidden p-2 -mr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 rounded text-neutral-200"
+            className="md:hidden p-2 -mr-2 rounded text-ink"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               {navOpen ? (
@@ -76,17 +84,11 @@ export default function Layout() {
         </nav>
 
         {navOpen && (
-          <div id="mobile-nav" className="md:hidden border-t border-neutral-800">
-            <ul className="flex flex-col p-2">
+          <div id="mobile-nav" className="md:hidden border-t border-line">
+            <ul className="flex flex-col py-2">
               {NAV_ITEMS.map((item) => (
                 <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      `block ${linkBase} ${isActive ? linkActive : linkInactive}`
-                    }
-                  >
+                  <NavLink to={item.to} end={item.end} className={mobileCls}>
                     {item.label}
                   </NavLink>
                 </li>
@@ -100,8 +102,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-neutral-800 mt-16">
-        <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm text-neutral-500">
+      <footer className="border-t border-line mt-16">
+        <div className="shell py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm text-faint">
           <p>&copy; {new Date().getFullYear()} lost,there</p>
           <ul className="flex gap-4">
             <li><span aria-label="Social link placeholder">[INSTAGRAM]</span></li>
