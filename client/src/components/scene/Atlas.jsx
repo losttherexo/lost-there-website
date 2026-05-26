@@ -16,24 +16,24 @@ const MAX_POLAR = THREE.MathUtils.degToRad(74) // mouse-up limit (almost flat to
 const SENS = 0.16 // mouse swing per axis (~±9°, gentle parallax)
 
 function CameraRig({ reduced, frozen }) {
-  const target = useRef(new THREE.Vector3())
+  const target = useRef(new THREE.Vector3(0, 25, 48)) // matches the load position
 
   useFrame((state) => {
-    if (frozen) return // hold the camera while a title is hovered (no drift toward it)
     const { camera, pointer } = state
-    // azimuth = horizontal mouse only (no idle rotation — the map itself moves now)
-    const azimuth = reduced ? 0 : pointer.x * SENS
-    // polar = tilt; mouse UP (pointer.y → +1) tilts toward the horizon
-    const polar = reduced
-      ? BASE_POLAR
-      : THREE.MathUtils.clamp(BASE_POLAR + pointer.y * SENS, MIN_POLAR, MAX_POLAR)
-
-    const sinP = Math.sin(polar)
-    target.current.set(
-      RADIUS * sinP * Math.sin(azimuth),
-      RADIUS * Math.cos(polar),
-      RADIUS * sinP * Math.cos(azimuth),
-    )
+    // While hovering a title, stop updating the target — the camera keeps easing
+    // toward its last target and decays smoothly to a stop (no snap, no recenter).
+    if (!frozen) {
+      const azimuth = reduced ? 0 : pointer.x * SENS
+      const polar = reduced
+        ? BASE_POLAR
+        : THREE.MathUtils.clamp(BASE_POLAR + pointer.y * SENS, MIN_POLAR, MAX_POLAR)
+      const sinP = Math.sin(polar)
+      target.current.set(
+        RADIUS * sinP * Math.sin(azimuth),
+        RADIUS * Math.cos(polar),
+        RADIUS * sinP * Math.cos(azimuth),
+      )
+    }
     camera.position.lerp(target.current, 0.05) // ease (higher = snappier)
     camera.lookAt(0, 0, 0)
   })
