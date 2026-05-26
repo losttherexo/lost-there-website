@@ -70,7 +70,7 @@ export default function ReleaseCard({ release }) {
             onClick={() => setOpen(false)}
             aria-label={`Close ${release.title} player`}
             tabIndex={open ? 0 : -1}
-            className="absolute right-2 top-2 z-10 rounded bg-canvas/70 p-1.5 text-muted backdrop-blur-sm hover:text-ink"
+            className="absolute left-2 top-2 z-10 rounded bg-canvas/70 p-1.5 text-muted backdrop-blur-sm hover:text-ink"
           >
             <FiX aria-hidden="true" />
           </button>
