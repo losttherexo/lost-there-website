@@ -1,44 +1,7 @@
 import { useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-
-// ── Cheap, dependency-free value noise → layered (fbm) for rolling hills. ──────
-// Real shader-based noise comes in the "look" phase (the TouchDesigner port);
-// this is enough to read as topography.
-function hash(x, y) {
-  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453
-  return n - Math.floor(n)
-}
-function noise(x, y) {
-  const xi = Math.floor(x)
-  const yi = Math.floor(y)
-  const xf = x - xi
-  const yf = y - yi
-  const u = xf * xf * (3 - 2 * xf) // smoothstep
-  const v = yf * yf * (3 - 2 * yf)
-  const a = hash(xi, yi)
-  const b = hash(xi + 1, yi)
-  const c = hash(xi, yi + 1)
-  const d = hash(xi + 1, yi + 1)
-  return THREE.MathUtils.lerp(THREE.MathUtils.lerp(a, b, u), THREE.MathUtils.lerp(c, d, u), v)
-}
-function fbm(x, y) {
-  let amp = 1
-  let freq = 1
-  let sum = 0
-  let norm = 0
-  for (let i = 0; i < 4; i++) {
-    sum += amp * noise(x * freq, y * freq)
-    norm += amp
-    amp *= 0.5
-    freq *= 2
-  }
-  return sum / norm
-}
-
-const SIZE = 240 // world units across — far bigger than the camera can see, so
-const SEGMENTS = 420 //   the real edge never enters frame; fog fades it to dark first
-const HEIGHT = 7 // max elevation
+import { displace, SIZE, SEGMENTS } from './terrainHeight'
 
 // Contour shader: draws a glowing line each time the surface crosses an elevation
 // step (like a topo map's iso-lines), plus a faint surface fill. fwidth keeps the
@@ -100,8 +63,7 @@ export default function Terrain({ reduced = false, ...props }) {
       const y = pos.getY(i)
       // Continuous topography everywhere (no island falloff); the camera only
       // ever sees the middle, and fog dissolves the rest before the edge.
-      const h = fbm(x * 0.06 + 100, y * 0.06 + 100) * HEIGHT
-      pos.setZ(i, h)
+      pos.setZ(i, displace(x, y))
     }
     geo.computeVertexNormals()
     return geo
