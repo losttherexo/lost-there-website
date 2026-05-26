@@ -63,7 +63,7 @@ function Marker({ to, label, x, z, onSelect, reduced }) {
         <button
           ref={btnRef}
           type="button"
-          onClick={() => onSelect(to)}
+          onClick={() => onSelect({ to, x, y, z })}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
           onFocus={() => setHovered(true)}

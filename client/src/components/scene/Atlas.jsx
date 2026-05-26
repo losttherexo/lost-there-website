@@ -4,9 +4,9 @@ import * as THREE from 'three'
 import Terrain from './Terrain'
 import Markers from './Markers'
 
-// Keep a roughly constant HORIZONTAL field of view across aspect ratios. three's
-// fov is vertical, so on a tall/narrow (portrait) screen we widen it — that keeps
-// the full marker spread in frame without moving the camera past the fog.
+const CANVAS_COLOR = '#0b0b0c' // --color-canvas; bg + fog share it so terrain fades into the dark
+
+// Keep a roughly constant HORIZONTAL field of view across aspect ratios.
 const TARGET_H_FOV = THREE.MathUtils.degToRad(64)
 
 function ResponsiveCamera({ portrait }) {
@@ -15,7 +15,6 @@ function ResponsiveCamera({ portrait }) {
   useEffect(() => {
     const aspect = size.width / Math.max(size.height, 1)
     let vFov = 2 * Math.atan(Math.tan(TARGET_H_FOV / 2) / Math.max(aspect, 0.0001))
-    // Portrait gets a higher cap so more of the map is shown.
     const maxFov = THREE.MathUtils.degToRad(portrait ? 112 : 92)
     vFov = THREE.MathUtils.clamp(vFov, THREE.MathUtils.degToRad(44), maxFov)
     camera.fov = THREE.MathUtils.radToDeg(vFov)
@@ -24,22 +23,35 @@ function ResponsiveCamera({ portrait }) {
   return null
 }
 
-const CANVAS_COLOR = '#0b0b0c' // --color-canvas; bg + fog share it so terrain fades into the dark
-
-// Camera rig: eases toward a point driven by the mouse, always looking at the
-// map's center. Default sits low toward the horizon; the mouse nudges it ~15%
-// each way. Always follows (never freezes). Reduced-motion holds the default.
+// Camera rig: mouse-driven by default; when `flight.current` is set (a clicked
+// marker), it flies down toward that coordinate instead.
 const RADIUS = 54
-const BASE_POLAR = THREE.MathUtils.degToRad(62) // resting tilt — toward the horizon
+const BASE_POLAR = THREE.MathUtils.degToRad(62)
 const MIN_POLAR = THREE.MathUtils.degToRad(48)
 const MAX_POLAR = THREE.MathUtils.degToRad(74)
-const SENS = 0.16 // mouse swing per axis (~±9°)
+const SENS = 0.16
 
-function CameraRig({ reduced, mouse, portrait }) {
-  const target = useRef(new THREE.Vector3(0, 25, 48)) // matches the load position
+function CameraRig({ reduced, mouse, portrait, flight }) {
+  const target = useRef(new THREE.Vector3(0, 25, 48))
+  const look = useRef(new THREE.Vector3(0, 0, 0))
+  const flyPos = useRef(new THREE.Vector3())
+  const flyLook = useRef(new THREE.Vector3())
 
   useFrame((state) => {
     const { camera } = state
+
+    // ── Flight: descend toward the clicked marker ──
+    if (flight.current) {
+      const m = flight.current
+      flyPos.current.set(m.x, m.y + 14, m.z + 10) // above + slightly back
+      flyLook.current.set(m.x, m.y + 1, m.z)
+      camera.position.lerp(flyPos.current, reduced ? 1 : 0.06) // ease in
+      look.current.lerp(flyLook.current, reduced ? 1 : 0.08)
+      camera.lookAt(look.current)
+      return
+    }
+
+    // ── Mouse mode ──
     const azimuth = reduced ? 0 : mouse.current.x * SENS
     const polar = reduced
       ? BASE_POLAR
@@ -50,17 +62,17 @@ function CameraRig({ reduced, mouse, portrait }) {
       RADIUS * Math.cos(polar),
       RADIUS * sinP * Math.cos(azimuth),
     )
-    camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
-    // Portrait: aim well down so the horizon rides up near the top and the ground
-    // fills most of the frame.
-    camera.lookAt(0, portrait ? -30 : 0, 0)
+    camera.position.lerp(target.current, 0.05)
+    look.current.set(0, portrait ? -30 : 0, 0) // kept in sync for a smooth flight hand-off
+    camera.lookAt(look.current)
   })
 
   return null
 }
 
-// The 3D "map" the site lives on: terrain + mouse-driven camera + section markers.
-export default function Atlas({ onSelect }) {
+// The 3D "map" the site lives on: terrain + mouse-driven camera + section markers,
+// with click-to-fly navigation.
+export default function Atlas({ onNavigate }) {
   const reduced = useMemo(
     () =>
       typeof window !== 'undefined' &&
@@ -68,8 +80,7 @@ export default function Atlas({ onSelect }) {
     [],
   )
 
-  // Portrait gets its own marker layout (uses the tall space). Switches live on
-  // orientation change.
+  // Portrait gets its own marker layout + framing. Switches live on orientation.
   const [portrait, setPortrait] = useState(
     () => typeof window !== 'undefined' && window.matchMedia?.('(orientation: portrait)').matches,
   )
@@ -80,8 +91,7 @@ export default function Atlas({ onSelect }) {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  // Track the mouse at the WINDOW level (not the canvas) so the camera keeps
-  // following even when the cursor is over a label/DOM element.
+  // Mouse at the WINDOW level so the camera follows even over DOM labels.
   const mouse = useRef({ x: 0, y: 0 })
   useEffect(() => {
     if (reduced) return
@@ -101,21 +111,43 @@ export default function Atlas({ onSelect }) {
     }
   }, [reduced])
 
+  // Flight: clicking a marker flies the camera there, fades to dark, then routes.
+  const flight = useRef(null)
+  const [flying, setFlying] = useState(false)
+  const FLIGHT_MS = reduced ? 350 : 1400
+  const handleSelect = (marker) => {
+    if (flight.current) return // already flying
+    flight.current = marker // { to, x, y, z }
+    setFlying(true)
+    window.setTimeout(() => onNavigate(marker.to), FLIGHT_MS)
+  }
+
   return (
-    <Canvas
-      dpr={[1, 2]}
-      camera={{ position: [0, 25, 48], fov: 46, near: 0.1, far: 200 }}
-      gl={{ antialias: true }}
-      onCreated={({ scene }) => {
-        scene.fog = new THREE.Fog(CANVAS_COLOR, 26, 72)
-      }}
-      style={{ position: 'absolute', inset: 0 }}
-    >
-      <color attach="background" args={[CANVAS_COLOR]} />
-      <ResponsiveCamera portrait={portrait} />
-      <Terrain reduced={reduced} portrait={portrait} />
-      <Markers onSelect={onSelect} reduced={reduced} portrait={portrait} />
-      <CameraRig reduced={reduced} mouse={mouse} portrait={portrait} />
-    </Canvas>
+    <>
+      <Canvas
+        dpr={[1, 2]}
+        camera={{ position: [0, 25, 48], fov: 46, near: 0.1, far: 200 }}
+        gl={{ antialias: true }}
+        onCreated={({ scene }) => {
+          scene.fog = new THREE.Fog(CANVAS_COLOR, 26, 72)
+        }}
+        style={{ position: 'absolute', inset: 0 }}
+      >
+        <color attach="background" args={[CANVAS_COLOR]} />
+        <ResponsiveCamera portrait={portrait} />
+        <Terrain reduced={reduced} portrait={portrait} />
+        <Markers onSelect={handleSelect} reduced={reduced} portrait={portrait} />
+        <CameraRig reduced={reduced} mouse={mouse} portrait={portrait} flight={flight} />
+      </Canvas>
+
+      {/* Fade-to-dark that covers the flight → route hand-off. */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 bg-canvas transition-opacity ease-in ${
+          flying ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ transitionDuration: `${FLIGHT_MS}ms` }}
+      />
+    </>
   )
 }

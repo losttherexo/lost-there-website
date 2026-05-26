@@ -10,7 +10,7 @@ export default function Home() {
 
   return (
     <section aria-label="lost,there — interactive map" className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden">
-      <Atlas onSelect={(to) => navigate(to)} />
+      <Atlas onNavigate={(to) => navigate(to)} />
     </section>
   )
 }
