@@ -4,12 +4,23 @@ import { Html } from '@react-three/drei'
 import { heightAt } from './terrainHeight'
 
 // z is depth: higher = closer to the camera (lower on screen).
-const SECTIONS = [
+// Desktop/landscape: wide horizontal spread.
+const SECTIONS_DESKTOP = [
   { to: '/music', label: 'music', x: -15, z: 18 },
   { to: '/shows', label: 'shows', x: -3, z: 18 },
   { to: '/lab', label: 'lab', x: 15, z: 16 },
   { to: '/about', label: 'about', x: 7, z: 8 },
   { to: '/contact', label: 'contact', x: -11, z: 6 },
+]
+
+// Portrait: narrower horizontally, spread DOWN the depth axis to use the tall
+// space — shows near the horizon (top), about/contact brought forward (bottom).
+const SECTIONS_PORTRAIT = [
+  { to: '/shows', label: 'shows', x: -6, z: 11 },
+  { to: '/lab', label: 'lab', x: 7, z: 15 },
+  { to: '/music', label: 'music', x: -8, z: 21 },
+  { to: '/about', label: 'about', x: 6, z: 28 },
+  { to: '/contact', label: 'contact', x: -5, z: 34 },
 ]
 
 const BEAM_H = 3 // beam height above the surface
@@ -66,6 +77,7 @@ function Marker({ to, label, x, z, onSelect, reduced }) {
   )
 }
 
-export default function Markers({ onSelect, reduced }) {
-  return SECTIONS.map((s) => <Marker key={s.to} onSelect={onSelect} reduced={reduced} {...s} />)
+export default function Markers({ onSelect, reduced, portrait }) {
+  const sections = portrait ? SECTIONS_PORTRAIT : SECTIONS_DESKTOP
+  return sections.map((s) => <Marker key={s.to} onSelect={onSelect} reduced={reduced} {...s} />)
 }

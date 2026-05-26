@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Terrain from './Terrain'
@@ -49,11 +49,7 @@ function CameraRig({ reduced, mouse }) {
       RADIUS * sinP * Math.cos(azimuth),
     )
     camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
-    // Pan the framing left on narrow/portrait screens so the leftmost marker
-    // (music) isn't clipped. Ramps to 0 on desktop aspects (no effect there).
-    const aspect = state.size.width / Math.max(state.size.height, 1)
-    const lookX = -THREE.MathUtils.clamp((0.8 - aspect) * 10, 0, 5)
-    camera.lookAt(lookX, 0, 0)
+    camera.lookAt(0, 0, 0)
   })
 
   return null
@@ -67,6 +63,18 @@ export default function Atlas({ onSelect }) {
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
     [],
   )
+
+  // Portrait gets its own marker layout (uses the tall space). Switches live on
+  // orientation change.
+  const [portrait, setPortrait] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(orientation: portrait)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: portrait)')
+    const onChange = () => setPortrait(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   // Track the mouse at the WINDOW level (not the canvas) so the camera keeps
   // following even when the cursor is over a label/DOM element.
@@ -102,7 +110,7 @@ export default function Atlas({ onSelect }) {
       <color attach="background" args={[CANVAS_COLOR]} />
       <ResponsiveCamera />
       <Terrain reduced={reduced} />
-      <Markers onSelect={onSelect} reduced={reduced} />
+      <Markers onSelect={onSelect} reduced={reduced} portrait={portrait} />
       <CameraRig reduced={reduced} mouse={mouse} />
     </Canvas>
   )
