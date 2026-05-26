@@ -35,9 +35,43 @@ function fbm(x, y) {
   return sum / norm
 }
 
-const SIZE = 60 // world units across
-const SEGMENTS = 120 // grid resolution (more = finer contours, heavier)
+const SIZE = 240 // world units across — far bigger than the camera can see, so
+const SEGMENTS = 420 //   the real edge never enters frame; fog fades it to dark first
 const HEIGHT = 7 // max elevation
+
+// Contour shader: draws a glowing line each time the surface crosses an elevation
+// step (like a topo map's iso-lines), plus a faint surface fill. fwidth keeps the
+// lines a consistent width regardless of slope. Distance fade replaces fog.
+const vertexShader = /* glsl */ `
+  varying float vHeight;
+  varying float vViewZ;
+  void main() {
+    vHeight = position.z;                       // displaced elevation (pre-rotation)
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vViewZ = -mv.z;                             // distance from camera
+    gl_Position = projectionMatrix * mv;
+  }
+`
+
+const fragmentShader = /* glsl */ `
+  precision highp float;
+  varying float vHeight;
+  varying float vViewZ;
+  uniform vec3 uColor;
+  uniform float uInterval;   // elevation between contour lines
+  uniform float uFogNear;
+  uniform float uFogFar;
+  void main() {
+    float h = vHeight / uInterval;
+    float dist = min(fract(h), 1.0 - fract(h));  // distance to nearest contour
+    float w = fwidth(h) * 1.25;                  // anti-aliased line width
+    float line = 1.0 - smoothstep(0.0, w, dist);
+    float fade = 1.0 - smoothstep(uFogNear, uFogFar, vViewZ);
+    float alpha = (line * 0.85 + 0.05) * fade;   // bright lines + faint fill
+    if (alpha < 0.002) discard;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`
 
 export default function Terrain(props) {
   // Build the displaced geometry once. A flat plane's vertices get pushed up the
@@ -49,20 +83,37 @@ export default function Terrain(props) {
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i)
       const y = pos.getY(i)
-      const dist = Math.sqrt(x * x + y * y) / (SIZE / 2)
-      const falloff = Math.max(0, 1 - dist * dist)
-      const h = fbm(x * 0.06 + 100, y * 0.06 + 100) * HEIGHT * falloff
+      // Continuous topography everywhere (no island falloff); the camera only
+      // ever sees the middle, and fog dissolves the rest before the edge.
+      const h = fbm(x * 0.06 + 100, y * 0.06 + 100) * HEIGHT
       pos.setZ(i, h)
     }
     geo.computeVertexNormals()
     return geo
   }, [])
 
-  // Rotate flat (plane is born in the XY plane; lay it down so Z-height becomes
-  // up). Wireframe + partial opacity gives the holographic contour read.
+  const uniforms = useMemo(
+    () => ({
+      uColor: { value: new THREE.Color('#6b8fb5') },
+      uInterval: { value: 0.4 },
+      uFogNear: { value: 26 },
+      uFogFar: { value: 72 },
+    }),
+    [],
+  )
+
+  // Laid flat (plane is born in XY; rotate so displaced Z becomes up).
   return (
     <mesh geometry={geometry} rotation-x={-Math.PI / 2} {...props}>
-      <meshBasicMaterial color="#6b8fb5" wireframe transparent opacity={0.55} />
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        transparent
+        depthWrite={false}
+        side={THREE.DoubleSide}
+        extensions={{ derivatives: true }}
+      />
     </mesh>
   )
 }

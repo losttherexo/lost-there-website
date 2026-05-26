@@ -1,46 +1,69 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { useMemo, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Terrain from './Terrain'
 
 const CANVAS_COLOR = '#0b0b0c' // --color-canvas; bg + fog share it so terrain fades into the dark
 
-// The 3D "map" that the site lives on. Phase A: terrain + camera + drag-to-orbit.
+// Camera rig: eases the camera toward a point driven by the mouse, always looking
+// at the map's center. Horizontal mouse = orbit around it; vertical = slight tilt.
+// A slow time drift keeps it alive when the mouse is still. Reduced-motion holds
+// a fixed bird's-eye and ignores both.
+const RADIUS = 54 // fixed distance from map center
+const BASE_POLAR = THREE.MathUtils.degToRad(26) // resting tilt (bird's-eye)
+const MIN_POLAR = THREE.MathUtils.degToRad(10) // mouse-down limit (near top-down)
+const MAX_POLAR = THREE.MathUtils.degToRad(74) // mouse-up limit (almost horizon)
+
+function CameraRig({ reduced }) {
+  const target = useRef(new THREE.Vector3())
+
+  useFrame((state) => {
+    const { camera, pointer, clock } = state
+    // Matched sensitivity so the mouse feels the same in every direction.
+    const SENS = 0.68
+    // azimuth = slow drift + horizontal mouse (peer around)
+    const azimuth = reduced ? 0 : clock.elapsedTime * 0.04 + pointer.x * SENS
+    // polar = tilt; mouse UP (pointer.y → +1) tilts toward the horizon
+    const polar = reduced
+      ? BASE_POLAR
+      : THREE.MathUtils.clamp(BASE_POLAR + pointer.y * SENS, MIN_POLAR, MAX_POLAR)
+
+    const sinP = Math.sin(polar)
+    target.current.set(
+      RADIUS * sinP * Math.sin(azimuth),
+      RADIUS * Math.cos(polar),
+      RADIUS * sinP * Math.cos(azimuth),
+    )
+    camera.position.lerp(target.current, 0.05) // ease (higher = snappier)
+    camera.lookAt(0, 0, 0)
+  })
+
+  return null
+}
+
+// The 3D "map" the site lives on. Phase A: terrain + mouse-driven camera.
 // Markers, click-to-fly navigation, and the holographic post-processing come next.
 export default function Atlas() {
-  const prefersReduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const reduced = useMemo(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+    [],
+  )
 
   return (
     <Canvas
-      // dpr cap: sharp on retina, but never above 2x (perf).
       dpr={[1, 2]}
-      // Camera positioned high and back, looking down at the landmass.
-      camera={{ position: [0, 20, 36], fov: 42, near: 0.1, far: 200 }}
+      camera={{ position: [0, 50, 22], fov: 46, near: 0.1, far: 200 }}
       gl={{ antialias: true }}
-      // Fog (same color as the background) makes distant terrain dissolve → depth.
       onCreated={({ scene }) => {
-        scene.fog = new THREE.Fog(CANVAS_COLOR, 34, 90)
+        scene.fog = new THREE.Fog(CANVAS_COLOR, 26, 72)
       }}
       style={{ position: 'absolute', inset: 0 }}
     >
       <color attach="background" args={[CANVAS_COLOR]} />
-
       <Terrain />
-
-      {/* Drag to orbit the map. Zoom/pan disabled so it stays composed; the polar
-          clamps keep the camera in a nice tilted band (never top-down or below). */}
-      <OrbitControls
-        enablePan={false}
-        enableZoom={false}
-        autoRotate={!prefersReduced}
-        autoRotateSpeed={0.3}
-        rotateSpeed={0.4}
-        minPolarAngle={Math.PI * 0.16}
-        maxPolarAngle={Math.PI * 0.46}
-        target={[0, 0, 0]}
-      />
+      <CameraRig reduced={reduced} />
     </Canvas>
   )
 }
