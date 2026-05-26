@@ -51,7 +51,7 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-export default function Terrain({ reduced = false, ...props }) {
+export default function Terrain({ reduced = false, portrait = false, ...props }) {
   // Build the displaced geometry once. A flat plane's vertices get pushed up the
   // Z axis by the noise; a radial falloff drops the edges so it reads as a
   // landmass fading into the dark rather than a tabletop.
@@ -81,8 +81,11 @@ export default function Terrain({ reduced = false, ...props }) {
   )
 
   // Drive the shader clock (the pulsing lines). Frozen under reduced-motion.
+  // Push the fog back in portrait so more terrain shows before it dissolves
+  // (raises the visible horizon).
   useFrame((state) => {
     if (!reduced) uniforms.uTime.value = state.clock.elapsedTime
+    uniforms.uFogFar.value = portrait ? 100 : 72
   })
 
   // Laid flat (plane is born in XY; rotate so displaced Z becomes up).

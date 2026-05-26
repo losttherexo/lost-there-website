@@ -16,7 +16,7 @@ function ResponsiveCamera({ portrait }) {
     const aspect = size.width / Math.max(size.height, 1)
     let vFov = 2 * Math.atan(Math.tan(TARGET_H_FOV / 2) / Math.max(aspect, 0.0001))
     // Portrait gets a higher cap so more of the map is shown.
-    const maxFov = THREE.MathUtils.degToRad(portrait ? 104 : 92)
+    const maxFov = THREE.MathUtils.degToRad(portrait ? 112 : 92)
     vFov = THREE.MathUtils.clamp(vFov, THREE.MathUtils.degToRad(44), maxFov)
     camera.fov = THREE.MathUtils.radToDeg(vFov)
     camera.updateProjectionMatrix()
@@ -51,8 +51,9 @@ function CameraRig({ reduced, mouse, portrait }) {
       RADIUS * sinP * Math.cos(azimuth),
     )
     camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
-    // Portrait: aim a touch lower so the cluster rides up toward screen-center.
-    camera.lookAt(0, portrait ? -7 : 0, 0)
+    // Portrait: aim lower so the horizon rides up high (~80% of the screen) and
+    // more ground fills the frame.
+    camera.lookAt(0, portrait ? -14 : 0, 0)
   })
 
   return null
@@ -112,7 +113,7 @@ export default function Atlas({ onSelect }) {
     >
       <color attach="background" args={[CANVAS_COLOR]} />
       <ResponsiveCamera portrait={portrait} />
-      <Terrain reduced={reduced} />
+      <Terrain reduced={reduced} portrait={portrait} />
       <Markers onSelect={onSelect} reduced={reduced} portrait={portrait} />
       <CameraRig reduced={reduced} mouse={mouse} portrait={portrait} />
     </Canvas>
