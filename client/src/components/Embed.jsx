@@ -54,15 +54,21 @@ export default function Embed({
   url = '',
   title,
   height,
+  fill = false,
   className = '',
 }) {
   const label = LABEL[provider] ?? provider
   const src = toEmbedSrc(provider, url)
   const h = height ?? DEFAULT_HEIGHT[provider] ?? 352
 
+  // `fill` mode: stretch to the parent's box (used inside the square crossfade).
   if (!src) {
     return (
-      <Placeholder label={`${label} embed`} minHeight={`${h}px`} className={className}>
+      <Placeholder
+        label={`${label} embed`}
+        minHeight={fill ? undefined : `${h}px`}
+        className={`${fill ? 'h-full' : ''} ${className}`}
+      >
         Add a {label} share URL in <code className="text-neutral-300">src/data/releases.js</code>.
       </Placeholder>
     )
@@ -73,8 +79,8 @@ export default function Embed({
       src={src}
       title={title ?? `${label} player`}
       loading="lazy"
-      className={`w-full rounded border border-line bg-surface ${className}`}
-      style={{ height: h }}
+      className={`w-full ${fill ? 'h-full border-0' : 'rounded border border-line'} bg-surface ${className}`}
+      style={fill ? undefined : { height: h }}
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       allowFullScreen
     />

@@ -1,5 +1,5 @@
-import { useId, useState } from 'react'
-import { FiChevronDown } from 'react-icons/fi'
+import { useState } from 'react'
+import { FiPlay, FiX } from 'react-icons/fi'
 import Embed from './Embed'
 
 // Square cover: real artwork when `release.cover` is set, else a placeholder tile.
@@ -9,7 +9,7 @@ function Cover({ release }) {
       <img
         src={release.cover}
         alt={release.coverAlt ?? `${release.title} cover artwork`}
-        className="aspect-square w-full object-cover"
+        className="h-full w-full object-cover"
         loading="lazy"
       />
     )
@@ -18,72 +18,72 @@ function Cover({ release }) {
     <div
       role="img"
       aria-label={release.coverAlt ?? `${release.title} — artwork coming soon`}
-      className="aspect-square w-full bg-elevated flex items-center justify-center"
+      className="flex h-full w-full items-center justify-center bg-elevated"
     >
-      <span className="text-faint text-[11px] uppercase tracking-[0.25em]">Artwork</span>
+      <span className="text-[11px] uppercase tracking-[0.25em] text-faint">Artwork</span>
     </div>
   )
 }
 
+// Layers cross-dissolve in place inside a fixed square — no layout shift either
+// direction. `motion-reduce` users get an instant swap.
+const layer =
+  'absolute inset-0 transition-opacity duration-500 ease-out motion-reduce:transition-none'
+
 export default function ReleaseCard({ release }) {
   const [open, setOpen] = useState(false)
-  const panelId = useId()
 
   return (
-    <article className="flex flex-col border border-line bg-surface">
-      <Cover release={release} />
-
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="font-medium leading-tight">{release.title}</h3>
-            <p className="mt-0.5 text-sm text-muted">
-              {release.year}
-              {release.type ? ` · ${release.type}` : ''}
-            </p>
-          </div>
-        </div>
-
+    <article className="border border-line bg-surface">
+      <div className="relative aspect-square">
+        {/* Cover layer (the trigger) */}
         <button
           type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => setOpen((o) => !o)}
-          className="mt-3 inline-flex items-center gap-1.5 self-start text-sm text-muted hover:text-ink transition-colors"
+          onClick={() => setOpen(true)}
+          aria-label={`Play ${release.title}`}
+          tabIndex={open ? -1 : 0}
+          className={`group ${layer} ${open ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
         >
-          {open ? 'Hide details' : 'Player & tracks'}
-          <FiChevronDown
-            aria-hidden="true"
-            className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          />
+          <Cover release={release} />
+          <span className="absolute inset-0 flex items-center justify-center bg-canvas/0 transition-colors group-hover:bg-canvas/40">
+            <FiPlay
+              aria-hidden="true"
+              size={30}
+              className="text-ink opacity-0 transition-opacity group-hover:opacity-100"
+            />
+          </span>
         </button>
-      </div>
 
-      {open && (
-        <div id={panelId} className="space-y-4 border-t border-line p-4">
+        {/* Embed layer */}
+        <div
+          aria-hidden={!open}
+          className={`${layer} ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        >
           <Embed
             provider={release.embed.provider}
             url={release.embed.url}
             title={`${release.title} — player`}
+            fill
           />
-          <ol className="divide-y divide-line">
-            {release.tracks.map((t) => (
-              <li
-                key={t.n}
-                className="flex items-center justify-between gap-4 py-2 text-sm"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <span className="w-5 shrink-0 tabular-nums text-faint">
-                    {String(t.n).padStart(2, '0')}
-                  </span>
-                  <span className="truncate">{t.title}</span>
-                </span>
-                <span className="shrink-0 tabular-nums text-faint">{t.duration}</span>
-              </li>
-            ))}
-          </ol>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label={`Close ${release.title} player`}
+            tabIndex={open ? 0 : -1}
+            className="absolute right-2 top-2 z-10 rounded bg-canvas/70 p-1.5 text-muted backdrop-blur-sm hover:text-ink"
+          >
+            <FiX aria-hidden="true" />
+          </button>
         </div>
-      )}
+      </div>
+
+      <div className="p-4">
+        <h3 className="font-medium leading-tight">{release.title}</h3>
+        <p className="mt-0.5 text-sm text-muted">
+          {release.year}
+          {release.type ? ` · ${release.type}` : ''}
+        </p>
+      </div>
     </article>
   )
 }
