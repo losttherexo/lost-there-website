@@ -13,14 +13,14 @@ const SECTIONS_DESKTOP = [
   { to: '/contact', label: 'contact', x: -11, z: 6 },
 ]
 
-// Portrait: narrower horizontally, spread DOWN the depth axis to use the tall
-// space — shows near the horizon (top), about/contact brought forward (bottom).
+// Portrait: spread DOWN the depth axis (top→bottom = far→near). Order from the
+// horizon down: music, shows, lab, about, contact. x alternates for a zigzag.
 const SECTIONS_PORTRAIT = [
-  { to: '/shows', label: 'shows', x: -6, z: 11 },
-  { to: '/lab', label: 'lab', x: 7, z: 15 },
-  { to: '/music', label: 'music', x: -8, z: 21 },
-  { to: '/about', label: 'about', x: 6, z: 28 },
-  { to: '/contact', label: 'contact', x: -5, z: 34 },
+  { to: '/music', label: 'music', x: -7, z: -2 },
+  { to: '/shows', label: 'shows', x: 8, z: 8 },
+  { to: '/lab', label: 'lab', x: -9, z: 18 },
+  { to: '/about', label: 'about', x: 7, z: 28 },
+  { to: '/contact', label: 'contact', x: -5, z: 38 },
 ]
 
 const BEAM_H = 3 // beam height above the surface
