@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Terrain from './Terrain'
@@ -15,10 +15,11 @@ const MIN_POLAR = THREE.MathUtils.degToRad(48) // mouse-down limit
 const MAX_POLAR = THREE.MathUtils.degToRad(74) // mouse-up limit (almost flat to horizon)
 const SENS = 0.16 // mouse swing per axis (~±9°, gentle parallax)
 
-function CameraRig({ reduced }) {
+function CameraRig({ reduced, frozen }) {
   const target = useRef(new THREE.Vector3())
 
   useFrame((state) => {
+    if (frozen) return // hold the camera while a title is hovered (no drift toward it)
     const { camera, pointer } = state
     // azimuth = horizontal mouse only (no idle rotation — the map itself moves now)
     const azimuth = reduced ? 0 : pointer.x * SENS
@@ -50,6 +51,15 @@ export default function Atlas({ onSelect }) {
     [],
   )
 
+  // Freeze the camera while any marker is hovered. Count handles moving directly
+  // between adjacent markers (leave fires before the next enter).
+  const hoverCount = useRef(0)
+  const [frozen, setFrozen] = useState(false)
+  const handleHover = (delta) => {
+    hoverCount.current = Math.max(0, hoverCount.current + delta)
+    setFrozen(hoverCount.current > 0)
+  }
+
   return (
     <Canvas
       dpr={[1, 2]}
@@ -63,8 +73,8 @@ export default function Atlas({ onSelect }) {
     >
       <color attach="background" args={[CANVAS_COLOR]} />
       <Terrain reduced={reduced} />
-      <Markers onSelect={onSelect} />
-      <CameraRig reduced={reduced} />
+      <Markers onSelect={onSelect} onHover={handleHover} reduced={reduced} />
+      <CameraRig reduced={reduced} frozen={frozen} />
     </Canvas>
   )
 }
