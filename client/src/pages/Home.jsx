@@ -9,7 +9,7 @@ export default function Home() {
   const navigate = useNavigate()
 
   return (
-    <section aria-label="lost,there — interactive map" className="relative h-[calc(100vh-4rem)] w-full overflow-hidden">
+    <section aria-label="lost,there — interactive map" className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden">
       <Atlas onSelect={(to) => navigate(to)} />
     </section>
   )

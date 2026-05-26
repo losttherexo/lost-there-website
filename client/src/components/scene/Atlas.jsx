@@ -1,8 +1,26 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Terrain from './Terrain'
 import Markers from './Markers'
+
+// Keep a roughly constant HORIZONTAL field of view across aspect ratios. three's
+// fov is vertical, so on a tall/narrow (portrait) screen we widen it — that keeps
+// the full marker spread in frame without moving the camera past the fog.
+const TARGET_H_FOV = THREE.MathUtils.degToRad(64)
+
+function ResponsiveCamera() {
+  const camera = useThree((s) => s.camera)
+  const size = useThree((s) => s.size)
+  useEffect(() => {
+    const aspect = size.width / Math.max(size.height, 1)
+    let vFov = 2 * Math.atan(Math.tan(TARGET_H_FOV / 2) / Math.max(aspect, 0.0001))
+    vFov = THREE.MathUtils.clamp(vFov, THREE.MathUtils.degToRad(44), THREE.MathUtils.degToRad(92))
+    camera.fov = THREE.MathUtils.radToDeg(vFov)
+    camera.updateProjectionMatrix()
+  }, [camera, size.width, size.height])
+  return null
+}
 
 const CANVAS_COLOR = '#0b0b0c' // --color-canvas; bg + fog share it so terrain fades into the dark
 
@@ -51,12 +69,20 @@ export default function Atlas({ onSelect }) {
   const mouse = useRef({ x: 0, y: 0 })
   useEffect(() => {
     if (reduced) return
-    const onMove = (e) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1
-      mouse.current.y = -((e.clientY / window.innerHeight) * 2 - 1)
+    const set = (clientX, clientY) => {
+      mouse.current.x = (clientX / window.innerWidth) * 2 - 1
+      mouse.current.y = -((clientY / window.innerHeight) * 2 - 1)
+    }
+    const onMove = (e) => set(e.clientX, e.clientY)
+    const onTouch = (e) => {
+      if (e.touches[0]) set(e.touches[0].clientX, e.touches[0].clientY)
     }
     window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
+    window.addEventListener('touchmove', onTouch, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('touchmove', onTouch)
+    }
   }, [reduced])
 
   return (
@@ -70,6 +96,7 @@ export default function Atlas({ onSelect }) {
       style={{ position: 'absolute', inset: 0 }}
     >
       <color attach="background" args={[CANVAS_COLOR]} />
+      <ResponsiveCamera />
       <Terrain reduced={reduced} />
       <Markers onSelect={onSelect} reduced={reduced} />
       <CameraRig reduced={reduced} mouse={mouse} />
