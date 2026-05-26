@@ -49,7 +49,11 @@ function CameraRig({ reduced, mouse }) {
       RADIUS * sinP * Math.cos(azimuth),
     )
     camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
-    camera.lookAt(0, 0, 0)
+    // Pan the framing left on narrow/portrait screens so the leftmost marker
+    // (music) isn't clipped. Ramps to 0 on desktop aspects (no effect there).
+    const aspect = state.size.width / Math.max(state.size.height, 1)
+    const lookX = -THREE.MathUtils.clamp((0.8 - aspect) * 10, 0, 5)
+    camera.lookAt(lookX, 0, 0)
   })
 
   return null
