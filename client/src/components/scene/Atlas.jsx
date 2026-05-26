@@ -53,7 +53,7 @@ function CameraRig({ reduced, mouse, portrait }) {
     camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
     // Portrait: aim well down so the horizon rides up near the top and the ground
     // fills most of the frame.
-    camera.lookAt(0, portrait ? -20 : 0, 0)
+    camera.lookAt(0, portrait ? -30 : 0, 0)
   })
 
   return null

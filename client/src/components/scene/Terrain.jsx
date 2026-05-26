@@ -85,7 +85,7 @@ export default function Terrain({ reduced = false, portrait = false, ...props })
   // (raises the visible horizon).
   useFrame((state) => {
     if (!reduced) uniforms.uTime.value = state.clock.elapsedTime
-    uniforms.uFogFar.value = portrait ? 112 : 72
+    uniforms.uFogFar.value = portrait ? 130 : 72
   })
 
   // Laid flat (plane is born in XY; rotate so displaced Z becomes up).

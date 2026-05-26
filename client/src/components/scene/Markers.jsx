@@ -16,11 +16,11 @@ const SECTIONS_DESKTOP = [
 // Portrait: spread DOWN the depth axis (top→bottom = far→near). Order from the
 // horizon down: music, shows, lab, about, contact. x alternates for a zigzag.
 const SECTIONS_PORTRAIT = [
-  { to: '/music', label: 'music', x: -7, z: -2 },
-  { to: '/shows', label: 'shows', x: 8, z: 8 },
-  { to: '/lab', label: 'lab', x: -9, z: 18 },
-  { to: '/about', label: 'about', x: 7, z: 28 },
-  { to: '/contact', label: 'contact', x: -5, z: 38 },
+  { to: '/music', label: 'music', x: -7, z: -12 },
+  { to: '/shows', label: 'shows', x: 8, z: 2 },
+  { to: '/lab', label: 'lab', x: -9, z: 16 },
+  { to: '/about', label: 'about', x: 7, z: 30 },
+  { to: '/contact', label: 'contact', x: -5, z: 44 },
 ]
 
 const BEAM_H = 3 // beam height above the surface
