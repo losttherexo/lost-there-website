@@ -10,6 +10,12 @@ const NAV_ITEMS = [
   { to: '/contact', label: 'contact' },
 ]
 
+const SOCIALS = [
+  { label: 'Instagram', href: 'https://www.instagram.com/lostthere.xo' },
+  { label: 'Spotify', href: 'https://open.spotify.com/artist/27dTdSe8fBtCAle3kuMaOB' },
+  { label: 'X', href: 'https://x.com/losttherexo' },
+]
+
 // Active state = accent underline (desktop) / accent left-rail (mobile).
 // Focus rings come from the global :focus-visible rule in index.css.
 const deskBase = 'px-3 py-2 text-sm uppercase tracking-wider border-b-2 transition-colors'
@@ -105,10 +111,20 @@ export default function Layout() {
       <footer className="border-t border-line mt-16">
         <div className="shell py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm text-faint">
           <p>&copy; {new Date().getFullYear()} lost,there</p>
-          <ul className="flex gap-4">
-            <li><span aria-label="Social link placeholder">[INSTAGRAM]</span></li>
-            <li><span aria-label="Social link placeholder">[SPOTIFY]</span></li>
-            <li><span aria-label="Social link placeholder">[BANDCAMP]</span></li>
+          <ul className="flex gap-5">
+            {SOCIALS.map((s) => (
+              <li key={s.label}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`lost,there on ${s.label} (opens in a new tab)`}
+                  className="hover:text-ink transition-colors"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </footer>
