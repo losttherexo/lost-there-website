@@ -18,11 +18,11 @@ function CameraRig({ reduced }) {
   const target = useRef(new THREE.Vector3())
 
   useFrame((state) => {
-    const { camera, pointer, clock } = state
+    const { camera, pointer } = state
     // Matched sensitivity so the mouse feels the same in every direction.
     const SENS = 0.68
-    // azimuth = slow drift + horizontal mouse (peer around)
-    const azimuth = reduced ? 0 : clock.elapsedTime * 0.04 + pointer.x * SENS
+    // azimuth = horizontal mouse only (no idle rotation — the map itself moves now)
+    const azimuth = reduced ? 0 : pointer.x * SENS
     // polar = tilt; mouse UP (pointer.y → +1) tilts toward the horizon
     const polar = reduced
       ? BASE_POLAR
@@ -62,7 +62,7 @@ export default function Atlas() {
       style={{ position: 'absolute', inset: 0 }}
     >
       <color attach="background" args={[CANVAS_COLOR]} />
-      <Terrain />
+      <Terrain reduced={reduced} />
       <CameraRig reduced={reduced} />
     </Canvas>
   )
