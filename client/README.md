@@ -133,10 +133,10 @@ client/
    ├─ data/
    │  └─ releases.js       ← editable placeholder release data (drives Music + Home featured)
    ├─ hooks/
-   │  └─ useDocumentTitle.js
+   │  └─ useDocumentTitle.js ← per-route <title> + <meta name="description">
    └─ pages/
-      ├─ Home.jsx           ← BUILT: hero, featured release, explore teasers
-      ├─ Music.jsx          ← BUILT: releases grid (ReleaseCard) + "listen everywhere"
+      ├─ Home.jsx           ← BUILT: minimal wordmark canvas (installation direction)
+      ├─ Music.jsx          ← BUILT: Releases grid; owns the open-player state
       ├─ Shows.jsx          ← wireframe
       ├─ Lab.jsx            ← wireframe
       ├─ About.jsx          ← wireframe (dual-purpose: fan bio + press kit)
@@ -147,9 +147,10 @@ client/
 
 ## Components
 
-- **`<Embed provider url title height />`** — the one embed primitive for the whole site. Builds the iframe src per provider (`spotify` / `soundcloud` / `untitled` / `apple` / `bandcamp` / `youtube`) from a normal share URL; empty `url` → a labeled placeholder box. Reuse for every embed slot (release players, TD reel, previz).
-- **`<ReleaseCard release />`** — square cover (or placeholder tile) + title/year; expands (accessible `aria-expanded`/`aria-controls` toggle) to reveal an `<Embed>` and the track listing. Fed by `data/releases.js`.
-- **`data/releases.js`** — array of releases (`title`, `year`, `type`, `cover`, `blurb`, `embed:{provider,url}`, `tracks[]`) + a `featuredRelease` export Home uses. All placeholder; edit in place, drop real share URLs into `embed.url`.
+- **`<Embed provider url title height fill />`** — the one embed primitive for the whole site. Builds the iframe src per provider (`spotify` / `soundcloud` / `untitled` / `apple` / `bandcamp` / `youtube`) from a normal share URL; empty `url` → a labeled placeholder box. `fill` stretches it to the parent (used inside the card's square). Reuse for every embed slot (release players, TD reel, previz).
+- **`<ReleaseCard release isOpen onOpen />`** — controlled card: square cover (or placeholder tile) + title/year/type. Clicking the cover **cross-dissolves in place** into the `<Embed>` player (fixed square, no layout shift, `motion-reduce` safe). Open/close is owned by the Music page, not the card.
+- **Music player state** — `Music.jsx` holds `openId` so **one player is open at a time** (opening one closes any other). It closes on a click outside any card, on **Escape**, or on **tab-hide** (`visibilitychange`). Clicks inside the cross-origin Spotify iframe never reach the page, so the player won't close itself while in use.
+- **`data/releases.js`** — array of releases (`id`, `title`, `year`, `type`, `cover`, `coverAlt`, `embed:{provider,url}`). The real lost,there catalog with self-hosted covers in `public/covers/`. To change: edit a field, swap a `cover` path, or drop a different share URL into `embed.url`. (`featuredRelease` export retained for a possible future featured block; currently unused.)
 
 ## Accessibility baseline
 
@@ -161,23 +162,28 @@ client/
 - Form inputs have explicit `<label htmlFor>` associations and `autoComplete` hints.
 - Placeholder anchors are rendered as `<button disabled>` so they don't navigate anywhere unexpected.
 
-## Wireframe fidelity
+## Page status
 
-Low. Boxes, dashed borders, labeled placeholder text. Dark palette is a base — final visual identity is intentionally deferred. Hierarchy and spacing read clearly; everything else is up for grabs.
+- **Home** — built. Stripped to a bare wordmark canvas (the site is heading toward doubling as a media installation, so Home is deliberately empty of nav-style clutter).
+- **Music** — built. `Releases` heading + responsive grid of `<ReleaseCard>` fed by the real catalog; cards cross-dissolve into Spotify players (one at a time). Footer socials are real.
+- **Shows / Lab / About / Contact** — still low-fi wireframe (dashed `<Placeholder>` boxes, bracketed copy). Hierarchy reads; visual identity deferred.
 
 ## Next steps
 
-- **Real content.** Replace every `[PLACEHOLDER]` token in `src/pages/` — tagline, bio, press quotes, project descriptions, capabilities statement, booking copy, tour dates.
-- **Visual identity.** Final type, color, motion language. Likely candidates: type pairing, a tighter neutral palette (natural tones / blues / B&W per artist direction), real photography. Tailwind `@theme {}` in `src/index.css` is where global tokens live.
-- **Embeds.** Wire `[SPOTIFY EMBED]`, `[SOUNDCLOUD EMBED]`, `[UNTITLED.STREAM EMBED]`, `[LIVE VIDEO EMBED]`, `[TD REEL EMBED]`, `[UNREAL PREVIZ EMBED]`, `[RELEASE EMBED]`, `[PROJECT THUMBNAIL/VIDEO]` slots with the real embed iframes. Probably abstract into a small `<Embed kind="spotify" id="..." />` component.
-- **Form backend.** Contact form is markup-only. Options: Formspree / Netlify Forms / a Vercel Edge Function / your own Flask server (currently sits in `../server`, out of scope for this rework).
-- **Press-kit downloads.** Wire the `[DOWNLOAD]` buttons in About to real files (or zip them) under `public/press/`.
-- **Social link URLs.** Replace `[INSTAGRAM]` / `[SPOTIFY]` / etc. buttons with real `<a href>`s in `Layout.jsx` and `Contact.jsx`.
-- **Deploy to Vercel.** `vite build` produces `dist/`. Vercel auto-detects Vite; just connect the repo and set `client` as the root.
-- **(Stretch) Light-mode toggle.** Wireframe is dark-only. Tailwind v4 supports `@variant dark` for adding a system-toggleable palette later.
+- **Strip / build the other four pages.** Shows, Lab, About, Contact are still wireframe — give them the same treatment as Home/Music.
+- **Real copy.** Replace remaining `[PLACEHOLDER]` tokens (bio, press, project descriptions, booking copy, tour dates) and tune the per-route meta descriptions in each page's `useDocumentTitle(...)` call.
+- **Visual identity.** Still neutral-by-design. Swap the typeface (`--font-sans` + the `<link>`) and accent (`--color-accent`) when locked; both are single-token changes.
+- **More embeds.** `<Embed>` already handles SoundCloud / untitled / YouTube / etc. — point the Lab's TD-reel / previz slots at it when ready.
+- **Form backend.** Contact form is markup-only (no backend in scope). Options: Formspree / a Vercel function / the Flask app in `../server`.
+- **Press-kit downloads.** Wire About's `[DOWNLOAD]` buttons to real files under `public/press/`.
+- **Launch checklist:** set `VITE_COMING_SOON="false"` on Vercel, remove the `noindex` meta in `index.html`, and confirm the Namecheap A-records have propagated so `lostthere.online` resolves.
+
+## Done (this build)
+
+Deploy pipeline (Vercel, GitHub auto-deploy, `client` root, SPA rewrite) · pre-launch coming-soon gate + `?preview` bypass · design-system tokens + Inter · real nav · Home + Music built · `<Embed>` + `<ReleaseCard>` · real Spotify catalog + self-hosted covers · real socials · per-route title + meta.
 
 ---
 
 **Resume prompt for fresh Claude sessions:**
 
-> I'm reworking my artist site for lost,there. The Vite client lives at `~/code/projects/artists/lost-there-website/client/` on WSL Ubuntu-20.04. Stack: Vite 5 + React 18 (JSX) + React Router v6 + Tailwind CSS v4. The site is a 6-page wireframe (Home, Music, Shows, Lab, About/EPK, Contact) with a shared `<Layout>` (nav, main, footer, skip-link, mobile drawer) and a `<Placeholder>` component for labeled wireframe boxes. Dark palette baseline (`bg-neutral-950` / `text-neutral-100`). Pages live in `src/pages/`, shared bits in `src/components/` and `src/hooks/`. Backend Flask app sits in `../server` but is out of scope. Branch: `vite-migration`. Read `client/README.md` for the migration summary and next-steps list.
+> Working on the lost,there artist site. Vite client at `~/code/projects/artists/lost-there-website/client/` on WSL Ubuntu-20.04. Stack: Vite 5 + React 18 (JSX) + React Router v6 + Tailwind CSS v4 (CSS-first tokens in `src/index.css` `@theme`). Deployed on Vercel (project `lost-there-website`, team `lostsoundlabs-projects`) via GitHub auto-deploy on `main`; **live but gated behind a coming-soon splash** (`VITE_COMING_SOON` env, `?preview=1` bypass), custom domain `lostthere.online` attached (Namecheap A-records). Home is a bare wordmark canvas; Music has the real Spotify catalog as cards that cross-dissolve into players (one-at-a-time state in `Music.jsx`); Shows/Lab/About/Contact are still wireframe. Shared `<Layout>` (nav + footer + skip-link + mobile drawer), `<Embed>` (provider-aware), `<ReleaseCard>` (controlled). Read `client/README.md` for full detail.

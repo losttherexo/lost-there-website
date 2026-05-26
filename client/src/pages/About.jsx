@@ -16,7 +16,7 @@ const DOWNLOADS = [
 ]
 
 export default function About() {
-  useDocumentTitle('About')
+  useDocumentTitle('About', 'About lost,there — bio, stats, and press kit.')
   return (
     <>
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">

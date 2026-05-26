@@ -8,7 +8,7 @@ const ctaCls =
   'inline-block px-6 py-3 border border-neutral-100 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-950 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950'
 
 export default function Lab() {
-  useDocumentTitle('Lab')
+  useDocumentTitle('Lab', 'Visual and creative-technology experiments from lost,there.')
   return (
     <>
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">

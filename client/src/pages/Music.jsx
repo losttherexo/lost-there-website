@@ -4,7 +4,7 @@ import ReleaseCard from '../components/ReleaseCard'
 import { releases } from '../data/releases'
 
 export default function Music() {
-  useDocumentTitle('Music')
+  useDocumentTitle('Music', 'Releases from lost,there — singles, EPs, and albums, with players.')
 
   // Single source of truth: id of the open card (null = all closed). Opening one
   // implicitly closes any other, so only one player is ever live at a time.
