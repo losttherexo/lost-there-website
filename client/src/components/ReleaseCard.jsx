@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { FiPlay, FiX } from 'react-icons/fi'
+import { FiPlay } from 'react-icons/fi'
 import Embed from './Embed'
 
 // Square cover: real artwork when `release.cover` is set, else a placeholder tile.
@@ -30,19 +29,20 @@ function Cover({ release }) {
 const layer =
   'absolute inset-0 transition-opacity duration-500 ease-out motion-reduce:transition-none'
 
-export default function ReleaseCard({ release }) {
-  const [open, setOpen] = useState(false)
-
+// Controlled: the Music page owns which card is open (one at a time) and handles
+// closing (outside-click / Escape / tab-hide), so this just renders open/closed
+// and reports intent to open. `data-release-card` marks the click-safe region.
+export default function ReleaseCard({ release, isOpen, onOpen }) {
   return (
-    <article className="border border-line bg-surface">
+    <article data-release-card className="border border-line bg-surface">
       <div className="relative aspect-square">
         {/* Cover layer (the trigger) */}
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={onOpen}
           aria-label={`Play ${release.title}`}
-          tabIndex={open ? -1 : 0}
-          className={`group ${layer} ${open ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+          tabIndex={isOpen ? -1 : 0}
+          className={`group ${layer} ${isOpen ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
         >
           <Cover release={release} />
           <span className="absolute inset-0 flex items-center justify-center bg-canvas/0 transition-colors group-hover:bg-canvas/40">
@@ -56,8 +56,8 @@ export default function ReleaseCard({ release }) {
 
         {/* Embed layer */}
         <div
-          aria-hidden={!open}
-          className={`${layer} ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+          aria-hidden={!isOpen}
+          className={`${layer} ${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
         >
           <Embed
             provider={release.embed.provider}
@@ -65,15 +65,6 @@ export default function ReleaseCard({ release }) {
             title={`${release.title} — player`}
             fill
           />
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label={`Close ${release.title} player`}
-            tabIndex={open ? 0 : -1}
-            className="absolute left-2 top-2 z-10 rounded bg-canvas/70 p-1.5 text-muted backdrop-blur-sm hover:text-ink"
-          >
-            <FiX aria-hidden="true" />
-          </button>
         </div>
       </div>
 
