@@ -9,16 +9,18 @@ import Markers from './Markers'
 // the full marker spread in frame without moving the camera past the fog.
 const TARGET_H_FOV = THREE.MathUtils.degToRad(64)
 
-function ResponsiveCamera() {
+function ResponsiveCamera({ portrait }) {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
   useEffect(() => {
     const aspect = size.width / Math.max(size.height, 1)
     let vFov = 2 * Math.atan(Math.tan(TARGET_H_FOV / 2) / Math.max(aspect, 0.0001))
-    vFov = THREE.MathUtils.clamp(vFov, THREE.MathUtils.degToRad(44), THREE.MathUtils.degToRad(92))
+    // Portrait gets a higher cap so more of the map is shown.
+    const maxFov = THREE.MathUtils.degToRad(portrait ? 104 : 92)
+    vFov = THREE.MathUtils.clamp(vFov, THREE.MathUtils.degToRad(44), maxFov)
     camera.fov = THREE.MathUtils.radToDeg(vFov)
     camera.updateProjectionMatrix()
-  }, [camera, size.width, size.height])
+  }, [camera, size.width, size.height, portrait])
   return null
 }
 
@@ -33,7 +35,7 @@ const MIN_POLAR = THREE.MathUtils.degToRad(48)
 const MAX_POLAR = THREE.MathUtils.degToRad(74)
 const SENS = 0.16 // mouse swing per axis (~±9°)
 
-function CameraRig({ reduced, mouse }) {
+function CameraRig({ reduced, mouse, portrait }) {
   const target = useRef(new THREE.Vector3(0, 25, 48)) // matches the load position
 
   useFrame((state) => {
@@ -49,7 +51,8 @@ function CameraRig({ reduced, mouse }) {
       RADIUS * sinP * Math.cos(azimuth),
     )
     camera.position.lerp(target.current, 0.05) // smooth follow / natural decay
-    camera.lookAt(0, 0, 0)
+    // Portrait: aim a touch lower so the cluster rides up toward screen-center.
+    camera.lookAt(0, portrait ? -7 : 0, 0)
   })
 
   return null
@@ -108,10 +111,10 @@ export default function Atlas({ onSelect }) {
       style={{ position: 'absolute', inset: 0 }}
     >
       <color attach="background" args={[CANVAS_COLOR]} />
-      <ResponsiveCamera />
+      <ResponsiveCamera portrait={portrait} />
       <Terrain reduced={reduced} />
       <Markers onSelect={onSelect} reduced={reduced} portrait={portrait} />
-      <CameraRig reduced={reduced} mouse={mouse} />
+      <CameraRig reduced={reduced} mouse={mouse} portrait={portrait} />
     </Canvas>
   )
 }
