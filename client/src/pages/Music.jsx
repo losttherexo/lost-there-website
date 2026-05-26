@@ -37,7 +37,7 @@ export default function Music() {
 
   return (
     <section aria-labelledby="releases-heading" className="shell py-12 md:py-16">
-      <h1 id="releases-heading" className="text-2xl font-semibold md:text-3xl">
+      <h1 id="releases-heading" className="text-4xl font-bold md:text-5xl">
         Releases
       </h1>
       <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
