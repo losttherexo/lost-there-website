@@ -17,10 +17,10 @@ const SECTIONS_DESKTOP = [
 // horizon down: music, shows, lab, about, contact. x alternates for a zigzag.
 const SECTIONS_PORTRAIT = [
   { to: '/music', label: 'music', x: -7, z: -12 },
-  { to: '/shows', label: 'shows', x: 8, z: 2 },
-  { to: '/lab', label: 'lab', x: -9, z: 16 },
-  { to: '/about', label: 'about', x: 7, z: 30 },
-  { to: '/contact', label: 'contact', x: -5, z: 44 },
+  { to: '/shows', label: 'shows', x: 8, z: 6 },
+  { to: '/lab', label: 'lab', x: -9, z: 20 },
+  { to: '/about', label: 'about', x: 7, z: 32 },
+  { to: '/contact', label: 'contact', x: -5, z: 42 },
 ]
 
 const BEAM_H = 3 // beam height above the surface
