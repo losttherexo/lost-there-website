@@ -163,14 +163,15 @@ client/
    │  └─ useDocumentTitle.js ← per-route <title> + <meta name="description">
    └─ pages/
       ├─ Home.jsx           ← renders null — IS the map overview (backdrop lives in Layout)
-      ├─ Music.jsx          ← BUILT: Releases grid; owns the open-player state
-      ├─ Shows.jsx          ← wireframe
-      ├─ Lab.jsx            ← wireframe
-      ├─ About.jsx          ← wireframe (dual-purpose: fan bio + press kit)
-      ├─ Contact.jsx        ← wireframe
+      ├─ Music.jsx          ← Releases grid; owns the open-player state
+      ├─ Shows.jsx          ← "Upcoming" list (h1)
+      ├─ Lab.jsx            ← "What I build" + Projects (reel goes in each card)
+      ├─ About.jsx          ← bio + booking email placeholder
+      ├─ Logs.jsx           ← blog ("Logs") — dated entries (was Contact; route /logs)
       ├─ ComingSoon.jsx     ← pre-launch splash
       └─ NotFound.jsx
 ```
+The 5 sections are **music, shows, lab, about, logs** (logs replaced contact — booking moved to About, socials are in the footer).
 
 ## Components
 
@@ -191,9 +192,14 @@ client/
 
 ## Page status
 
+All section pages render **over the topo backdrop** (through a scrim) and are on the design tokens. Content is still placeholder; they may want further styling for the overlay context.
+
 - **Home** — the 3D map overview (renders `null`; the map + pins live in `Layout`/`Atlas`). Navigate by clicking pins.
-- **Music** — built, but styled for a solid background — it now renders **over the topo backdrop** through the scrim, so it likely wants restyling for the overlay context. Releases grid of `<ReleaseCard>` fed by the real catalog; cards cross-dissolve into Spotify players (one at a time).
-- **Shows / Lab / About / Contact** — still low-fi wireframe, now sitting over the backdrop. Need building/restyling for the overlay.
+- **Music** — Releases grid of `<ReleaseCard>` fed by the real catalog; cards cross-dissolve into Spotify players (one at a time).
+- **Shows** — just the **Upcoming** list (the h1); placeholder dates/venues.
+- **Lab** — **What I build** (h1 + capabilities line) + **Projects** grid; each card has a reel/video slot for an `<Embed>` later.
+- **About** — **About** (h1) + bio (photo + copy) + a **Booking** email placeholder.
+- **Logs** — a blog (**Logs** h1) of dated placeholder entries. (Route `/logs`; replaced the old Contact page.)
 
 ## Next steps
 
@@ -202,7 +208,7 @@ client/
 - **Tune the section camera framing** — where the camera lands per section (`CameraRig`'s section branch in `Atlas.jsx`) and how much topography sits behind the content.
 - **Real copy + per-route meta** — replace `[PLACEHOLDER]` tokens; tune `useDocumentTitle(...)` descriptions.
 - **Visual identity** — swap typeface (`--font-sans` + `<link>`) / accent (`--color-accent`) when locked.
-- **Form backend** (Contact) — Formspree / Vercel function / the Flask app in `../server`.
+- **Booking + Logs content** — About has a booking-email placeholder (no form); Logs is a placeholder blog. Wire a real email and real entries (and decide if Logs needs a data source / MD).
 - **Perf** — the three.js bundle is ~280 KB gzip; consider lazy-loading `Atlas` so the splash/other entry doesn't pay for it. Vite warns on chunk size (cosmetic).
 - **Go live:** merge `feat/topo-nav` → `main`, then the launch checklist: `VITE_COMING_SOON="false"` on Vercel, remove the `noindex` meta in `index.html`, confirm Namecheap A-records resolve `lostthere.online`.
 
@@ -214,4 +220,4 @@ Deploy pipeline (Vercel, GitHub auto-deploy, `client` root, SPA rewrite) · comi
 
 **Resume prompt for fresh Claude sessions:**
 
-> Working on the lost,there artist site. Vite client at `~/code/projects/artists/lost-there-website/client/` on WSL Ubuntu-20.04. Stack: Vite 5 + React 18 (JSX) + React Router v6 + Tailwind v4 (CSS-first tokens in `src/index.css` `@theme`) + **three 0.160 / @react-three/fiber 8 / @react-three/drei 9** (React-18 majors — don't bump to fiber 9/drei 10). **Active branch: `feat/topo-nav`** (NOT merged to main; `main` is the older flat-page version still deployed behind the splash). The homepage is a **3D holographic topographic map** that is a **persistent backdrop** behind every route: `src/components/scene/` (`Atlas` = the Canvas, mounted once in `Layout`; `Terrain` = contour-shader heightfield with traveling-wave animation; `Markers` = section pins; `sections.js` = coordinates; `terrainHeight.js` = shared fbm). Camera is route-driven (overview mouse-parallax on home with pins; flies to a coordinate and holds for a section, content fading in over a scrim). No nav bar — pins navigate, `SectionMenu` (corner slide-in drawer) jumps around on section pages; persistent `lost,there` title (top-left) + footer. Portrait has its own marker layout + framing. Music/Shows/Lab/About/Contact section pages now overlay the backdrop and likely need restyling. Deployed on Vercel (project `lost-there-website`, team `lostsoundlabs-projects`), gated behind a coming-soon splash (`VITE_COMING_SOON`, `?preview=1`), domain `lostthere.online` attached. Read `client/README.md` (esp. "The 3D map") for full detail.
+> Working on the lost,there artist site. Vite client at `~/code/projects/artists/lost-there-website/client/` on WSL Ubuntu-20.04. Stack: Vite 5 + React 18 (JSX) + React Router v6 + Tailwind v4 (CSS-first tokens in `src/index.css` `@theme`) + **three 0.160 / @react-three/fiber 8 / @react-three/drei 9** (React-18 majors — don't bump to fiber 9/drei 10). **Active branch: `feat/topo-nav`** (NOT merged to main; `main` is the older flat-page version still deployed behind the splash). The homepage is a **3D holographic topographic map** that is a **persistent backdrop** behind every route: `src/components/scene/` (`Atlas` = the Canvas, mounted once in `Layout`; `Terrain` = contour-shader heightfield with traveling-wave animation; `Markers` = section pins; `sections.js` = coordinates; `terrainHeight.js` = shared fbm). Camera is route-driven (overview mouse-parallax on home with pins; flies to a coordinate and holds for a section, content fading in over a scrim). No nav bar — pins navigate, `SectionMenu` (corner slide-in drawer) jumps around on section pages; persistent `lost,there` title (top-left) + footer. Portrait has its own marker layout + framing. The 5 sections are music/shows/lab/about/**logs** (logs is a blog — replaced contact; booking moved to About, socials in footer). Section pages overlay the backdrop and may want further styling. Deployed on Vercel (project `lost-there-website`, team `lostsoundlabs-projects`), gated behind a coming-soon splash (`VITE_COMING_SOON`, `?preview=1`), domain `lostthere.online` attached. Read `client/README.md` (esp. "The 3D map") for full detail.
