@@ -12,15 +12,23 @@ export default function About() {
         </h1>
         <div className="mt-8 grid grid-cols-1 items-start gap-6 md:grid-cols-[1fr_2fr]">
           <Placeholder label="[ARTIST PHOTO]" minHeight="320px" />
-          <Placeholder label="[BIO COPY]" minHeight="320px">
-            Long-form narrative bio. Fan-facing tone. Multiple paragraphs.
-          </Placeholder>
+          <div className="space-y-4 text-lg leading-relaxed text-muted">
+            <p>
+              the comma is the thesis. dislocated and present at the same time. most of us are
+              both, most of the time.
+            </p>
+            <p>
+              the songs get made between a guitar and a stack of screens — and from either side,
+              the question doesn&rsquo;t change:
+            </p>
+            <p className="text-ink">what lives in the middle, and how do i get there?</p>
+          </div>
         </div>
       </section>
 
-      <section aria-labelledby="booking-heading" className="shell border-t border-line py-12">
-        <h2 id="booking-heading" className="mb-3 text-2xl font-semibold md:text-3xl">
-          Booking
+      <section aria-labelledby="contact-heading" className="shell border-t border-line py-12">
+        <h2 id="contact-heading" className="mb-3 text-2xl font-semibold md:text-3xl">
+          Contact
         </h2>
         <p className="text-muted">[BOOKING EMAIL — e.g. booking@lostthere.online]</p>
       </section>

@@ -12,10 +12,6 @@ export default function Lab() {
         <h1 id="build-heading" className="text-4xl font-bold tracking-tight md:text-5xl">
           What I build
         </h1>
-        <p className="mt-4 max-w-xl text-muted">
-          [CAPABILITIES STATEMENT — TouchDesigner show automation, Unreal previz, generative
-          visuals, custom tooling.]
-        </p>
       </section>
 
       <section aria-labelledby="projects-heading" className="shell border-t border-line py-12">

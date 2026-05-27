@@ -1,11 +1,7 @@
 import useDocumentTitle from '../hooks/useDocumentTitle'
 
-const UPCOMING = [
-  { date: '[DATE]', venue: '[VENUE]', city: '[CITY]' },
-  { date: '[DATE]', venue: '[VENUE]', city: '[CITY]' },
-  { date: '[DATE]', venue: '[VENUE]', city: '[CITY]' },
-  { date: '[DATE]', venue: '[VENUE]', city: '[CITY]' },
-]
+// Add shows here: { date: '…', venue: '…', city: '…' }. Empty = "more coming soon".
+const UPCOMING = []
 
 export default function Shows() {
   useDocumentTitle('Shows', 'Upcoming lost,there live dates and where to catch the project live.')
@@ -16,27 +12,31 @@ export default function Shows() {
         Upcoming
       </h1>
 
-      <ul className="mt-8 divide-y divide-line border-y border-line">
-        {UPCOMING.map((show, i) => (
-          <li
-            key={i}
-            className="grid grid-cols-1 items-baseline gap-2 px-1 py-4 sm:grid-cols-[160px_1fr_auto] sm:gap-6"
-          >
-            <span className="font-mono text-sm text-muted">{show.date}</span>
-            <span>
-              <span className="font-medium text-ink">{show.venue}</span>
-              <span className="text-faint"> · {show.city}</span>
-            </span>
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed justify-self-start border border-line px-3 py-1.5 text-sm text-faint sm:justify-self-end"
+      {UPCOMING.length === 0 ? (
+        <p className="mt-8 text-lg text-muted">more coming soon.</p>
+      ) : (
+        <ul className="mt-8 divide-y divide-line border-y border-line">
+          {UPCOMING.map((show, i) => (
+            <li
+              key={i}
+              className="grid grid-cols-1 items-baseline gap-2 px-1 py-4 sm:grid-cols-[160px_1fr_auto] sm:gap-6"
             >
-              [TICKET LINK]
-            </button>
-          </li>
-        ))}
-      </ul>
+              <span className="font-mono text-sm text-muted">{show.date}</span>
+              <span>
+                <span className="font-medium text-ink">{show.venue}</span>
+                <span className="text-faint"> · {show.city}</span>
+              </span>
+              <button
+                type="button"
+                disabled
+                className="cursor-not-allowed justify-self-start border border-line px-3 py-1.5 text-sm text-faint sm:justify-self-end"
+              >
+                [TICKET LINK]
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
