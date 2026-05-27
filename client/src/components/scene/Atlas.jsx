@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import Terrain from './Terrain'
 import Markers from './Markers'
@@ -8,6 +9,7 @@ import { findSection } from './sections'
 
 const CANVAS_COLOR = '#0b0b0c' // --color-canvas; bg + fog share it so terrain fades into the dark
 const TARGET_H_FOV = THREE.MathUtils.degToRad(64)
+const BLOOM = true // subtle holographic glow; set false to remove entirely
 
 function ResponsiveCamera({ portrait }) {
   const camera = useThree((s) => s.camera)
@@ -128,6 +130,18 @@ export default function Atlas({ activeTo, onNavigate }) {
       <Terrain reduced={reduced} portrait={portrait} />
       {!activeTo && <Markers onNavigate={onNavigate} reduced={reduced} portrait={portrait} />}
       <CameraRig reduced={reduced} mouse={mouse} portrait={portrait} activeTo={activeTo} />
+
+      {BLOOM && (
+        <EffectComposer>
+          <Bloom
+            intensity={0.45} // overall glow strength
+            luminanceThreshold={0.15} // only brighter pixels (lines/beams) bloom
+            luminanceSmoothing={0.3}
+            mipmapBlur
+            radius={0.6}
+          />
+        </EffectComposer>
+      )}
     </Canvas>
   )
 }
