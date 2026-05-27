@@ -8,7 +8,7 @@ const ITEMS = [
   { to: '/shows', label: 'shows' },
   { to: '/lab', label: 'lab' },
   { to: '/about', label: 'about' },
-  { to: '/contact', label: 'contact' },
+  { to: '/logs', label: 'logs' },
 ]
 
 const linkCls = ({ isActive }) =>

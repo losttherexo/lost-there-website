@@ -5,7 +5,7 @@ import Music from './pages/Music'
 import Shows from './pages/Shows'
 import Lab from './pages/Lab'
 import About from './pages/About'
-import Contact from './pages/Contact'
+import Logs from './pages/Logs'
 import NotFound from './pages/NotFound'
 import ComingSoon from './pages/ComingSoon'
 import { SHOW_SPLASH } from './comingSoon'
@@ -22,7 +22,7 @@ export default function App() {
         <Route path="/shows" element={<Shows />} />
         <Route path="/lab" element={<Lab />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/logs" element={<Logs />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
