@@ -8,7 +8,9 @@
 // in index.html).
 //
 // PREVIEW BYPASS: visit the live site with ?preview=1 to see the full site behind
-// the splash on this browser (persists via localStorage). ?preview=0 re-locks it.
+// the splash on this browser. The unlock lives in sessionStorage, so it clears
+// when the browser/tab is closed (survives reloads within a session). ?preview=0
+// re-locks it immediately.
 // ---------------------------------------------------------------------------
 
 const FLAG = import.meta.env.VITE_COMING_SOON
@@ -23,12 +25,12 @@ function previewUnlocked() {
   if (params.has('preview')) {
     const on = params.get('preview') !== '0'
     try {
-      on ? localStorage.setItem(PREVIEW_KEY, '1') : localStorage.removeItem(PREVIEW_KEY)
-    } catch { /* localStorage unavailable — ignore */ }
+      on ? sessionStorage.setItem(PREVIEW_KEY, '1') : sessionStorage.removeItem(PREVIEW_KEY)
+    } catch { /* sessionStorage unavailable — ignore */ }
     return on
   }
   try {
-    return localStorage.getItem(PREVIEW_KEY) === '1'
+    return sessionStorage.getItem(PREVIEW_KEY) === '1'
   } catch {
     return false
   }
