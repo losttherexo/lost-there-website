@@ -44,8 +44,8 @@ const fragmentShader = /* glsl */ `
     float crest = smoothstep(0.4, 1.6, wave);
 
     float fade = 1.0 - smoothstep(uFogNear, uFogFar, vViewZ);
-    // base 1.3 = brighter resting lines; crest adds the wave pop; 0.08 = faint surface glow
-    float alpha = (line * (1.3 + crest * 1.8) + 0.08) * fade;
+    // base = resting line brightness; crest = wave pop; last term = faint surface glow
+    float alpha = (line * (1.05 + crest * 2.2) + 0.12) * fade;
     if (alpha < 0.002) discard;
     gl_FragColor = vec4(uColor, alpha);
   }
@@ -71,7 +71,7 @@ export default function Terrain({ reduced = false, portrait = false, ...props })
 
   const uniforms = useMemo(
     () => ({
-      uColor: { value: new THREE.Color('#6b8fb5') },
+      uColor: { value: new THREE.Color('#84a7cf') },
       uInterval: { value: 0.4 },
       uFogNear: { value: 26 },
       uFogFar: { value: 72 },
