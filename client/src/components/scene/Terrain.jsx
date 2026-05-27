@@ -86,6 +86,9 @@ export default function Terrain({ reduced = false, portrait = false, ...props })
   useFrame((state) => {
     if (!reduced) uniforms.uTime.value = state.clock.elapsedTime
     uniforms.uFogFar.value = portrait ? 130 : 72
+    // Tighter contour interval in landscape so the lines are as dense as the
+    // steep portrait view makes them look.
+    uniforms.uInterval.value = portrait ? 0.4 : 0.22
   })
 
   // Laid flat (plane is born in XY; rotate so displaced Z becomes up).
