@@ -79,3 +79,20 @@
 @utility shell {
   @apply max-w-6xl mx-auto px-4 sm:px-6;
 }
+
+/* Section content fades in as the camera flies to its coordinate. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*='fadeIn'] {
+    animation: none !important;
+  }
+}
