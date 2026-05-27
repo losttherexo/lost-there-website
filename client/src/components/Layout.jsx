@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Atlas from './scene/Atlas'
 import SectionMenu from './SectionMenu'
 
@@ -21,6 +21,16 @@ export default function Layout() {
       <div className="fixed inset-0 z-0">
         <Atlas activeTo={activeTo} onNavigate={navigate} />
       </div>
+
+      {/* Persistent brand title / home link, top-left on every page. */}
+      <NavLink
+        to="/"
+        end
+        aria-label="lost,there — home"
+        className="pointer-events-auto fixed left-4 top-4 z-40 text-xl font-semibold tracking-tight text-ink [text-shadow:0_1px_12px_rgb(0_0_0_/_0.55)]"
+      >
+        lost,there
+      </NavLink>
 
       {/* Section pages: scrim for legibility + the slide-in menu. The map/home has
           neither — you navigate it by its pins. */}
@@ -49,28 +59,26 @@ export default function Layout() {
           )}
         </main>
 
-        {!isHome && (
-          <footer className="pointer-events-auto mt-16 border-t border-line/60 backdrop-blur-sm">
-            <div className="shell flex flex-col items-start justify-between gap-4 py-8 text-sm text-faint sm:flex-row sm:items-center">
-              <p>&copy; {new Date().getFullYear()} lost,there</p>
-              <ul className="flex gap-5">
-                {SOCIALS.map((s) => (
-                  <li key={s.label}>
-                    <a
-                      href={s.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`lost,there on ${s.label} (opens in a new tab)`}
-                      className="transition-colors hover:text-ink"
-                    >
-                      {s.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </footer>
-        )}
+        <footer className="pointer-events-auto mt-16 border-t border-line/60 backdrop-blur-sm">
+          <div className="shell flex flex-col items-start justify-between gap-4 py-8 text-sm text-faint sm:flex-row sm:items-center">
+            <p>&copy; {new Date().getFullYear()} lost,there</p>
+            <ul className="flex gap-5">
+              {SOCIALS.map((s) => (
+                <li key={s.label}>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`lost,there on ${s.label} (opens in a new tab)`}
+                    className="transition-colors hover:text-ink"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </footer>
       </div>
     </>
   )
