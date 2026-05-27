@@ -7,7 +7,7 @@ export const SECTIONS_DESKTOP = [
   { to: '/shows', label: 'shows', x: -3, z: 18 },
   { to: '/lab', label: 'lab', x: 15, z: 16 },
   { to: '/about', label: 'about', x: 7, z: 8 },
-  { to: '/contact', label: 'contact', x: -11, z: 6 },
+  { to: '/contact', label: 'contact', x: -11, z: 3 },
 ]
 
 // Portrait: spread down the depth axis (top→bottom = far→near).
@@ -16,7 +16,7 @@ export const SECTIONS_PORTRAIT = [
   { to: '/shows', label: 'shows', x: 8, z: 6 },
   { to: '/lab', label: 'lab', x: -9, z: 20 },
   { to: '/about', label: 'about', x: 7, z: 32 },
-  { to: '/contact', label: 'contact', x: -5, z: 42 },
+  { to: '/contact', label: 'contact', x: -5, z: 38 },
 ]
 
 export function getSections(portrait) {
